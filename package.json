@@ -3,7 +3,6 @@
     "random-words": "^2.0.1"
   },
   "type": "module",
-  "name": "stranded_words_app",
   "version": "1.0.0",
   "main": "index.html",
   "devDependencies": {},
