@@ -1,5 +1,16 @@
 {
   "dependencies": {
     "random-words": "^2.0.1"
-  }
+  },
+  "type": "module",
+  "name": "stranded_words_app",
+  "version": "1.0.0",
+  "main": "index.html",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
