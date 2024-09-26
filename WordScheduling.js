@@ -57,16 +57,32 @@ export default function WordScheduling(weightedWords) {
   let selectedWords = [];
   let totalChars = 0;
   let keyword = weightedWords[0].word;
+
   let totalWeight = weightedWords[0].weight;
 
+// Inside the while loop of WordScheduling function:
+// This loop continues until we either run out of words (weightedWords.length > 0)
+// or we reach the goal of exactly 48 characters (totalChars < 48).
   // Stop conditions are when we've reached 48 characters or there are no more words to consider.
   while (weightedWords.length > 0 && totalChars < 48) {
     // Starting here means we need to reset the selectedWords array.
     // It starts with the keyword only.
-    selectedWords = [keyword];
-    totalChars = keyword.length;
-    totalWeight = weightedWords[0].weight;
+    // adding some debbugging to console
+    // DEBUGGING: Track the current state of the loop at the start of each iteration.
+  // This is useful for ensuring the loop operates as expected on each pass.
+  console.log("Starting new iteration with keyword:", keyword); // Log the first word, which is always included.
+  console.log("Current totalChars:", totalChars); // Log the total character count at the start of each iteration.
+  // Reset the selected words list for each new attempt. 
+  // We must always start with the highest-weighted word (keyword), so it's the first word in selectedWords.
+    selectedWords = [keyword];   // Set initial character count to the length of the keyword.
+    totalChars = keyword.length;  
+    totalWeight = weightedWords[0].weight;  // Start with the weight of the keyword
+    console.log("starting new iteration with keyword: ", keyword);  
+    console.log("Current totalChars:", totalChars);
 
+
+
+    
     /* 
        Pop off the highest weighted word.
        We do this because on the first run that word is the keyword which we are guaranteed to use, OR:
@@ -108,3 +124,27 @@ export default function WordScheduling(weightedWords) {
 }
 
 console.log(WordScheduling(sampleWords));
+//secondary test case
+let testWords1 = [
+  { word: "GALAXY", weight: 20 },   // 6 chars
+  { word: "ASTEROID", weight: 18 }, // 8 chars
+  { word: "ROBOT", weight: 15 },    // 5 chars
+  { word: "ALIEN", weight: 10 },    // 5 chars
+  { word: "SPACESHIP", weight: 5 }  // 9 chars
+];
+console.log("Test Case 1: ", WordScheduling(testWords1));  // Expected output: Word combinations that = 48
+// Example 2: First word exceeds 48 characters
+let testWords2 = [
+  { word: "SUPERCALIFRAGILISTICEXPIALIDOCIOUS", weight: 20 },  // 34 chars
+  { word: "ASTEROID", weight: 18 },                            // 8 chars
+  { word: "SPACESHIP", weight: 15 }                            // 9 chars
+];
+console.log("Test Case 2: ", WordScheduling(testWords2));  // Expected: "No combinations that total to 48 characters."
+
+// Example 3: Input where no valid combination of words can total exactly 48 characters
+let testWords3 = [
+  { word: "ALIEN", weight: 20 },   // 5 chars
+  { word: "PLANET", weight: 18 },  // 6 chars
+  { word: "SPACE", weight: 10 }    // 5 chars
+];
+console.log("Test Case 3: ", WordScheduling(testWords3));  // Expected: "No combinations that total to 48 characters."
