@@ -1,0 +1,67 @@
+import WordScheduling from '../src/WordScheduling.js';
+
+// Test Case 1: Standard words with varying lengths and weights
+const testCase1 = [
+  { word: "SCIENCEFICTION", weight: 20 },
+  { word: "MUTANT", weight: 19 },
+  { word: "ASTRONAUT", weight: 18 },
+  { word: "ALIEN", weight: 17 },
+  { word: "DROID", weight: 16 },
+  { word: "CYBORG", weight: 15 },
+  { word: "GALAXY", weight: 14 },
+  { word: "ROBOT", weight: 13 },
+  { word: "MARTIAN", weight: 12 },
+  { word: "SPACESHIP", weight: 11 },
+  { word: "ASTEROID", weight: 10 },
+  { word: "EXTRATERRESTRIAL", weight: 9 },
+  { word: "TELEPORT", weight: 8 },
+  { word: "STARSHIP", weight: 7 },
+  { word: "INTERGALACTIC", weight: 6 },
+  { word: "ORBIT", weight: 5 },
+  { word: "SPACECRAFT", weight: 4 },
+  { word: "ASTRONOMY", weight: 3 },
+  { word: "COSMOS", weight: 2 },
+  { word: "SPACETIME", weight: 1 },
+];
+
+// Test Case 2: No valid combinations
+const testCase2 = [
+  { word: "BUTTERFLY", weight: 10 },
+  { word: "DRAGONFLY", weight: 9 }
+];
+
+// Test Case 3: Empty Input
+const testCase3 = [];
+
+// Test Case 4: Single Word
+const testCase4 = [{ word: "EARTH", weight: 5 }];
+
+// Test Case 5: Words with the Same Length
+const testCase5 = [
+  { word: "FOUR", weight: 1 },
+  { word: "FIVE", weight: 2 },
+  { word: "NINE", weight: 3 }
+];
+
+// Test Case 6: Combination of words totaling 48 characters
+const testCase6 = [
+  { word: "GALAXY", weight: 10 },
+  { word: "SPACESHIP", weight: 9 },
+  { word: "MARTIAN", weight: 8 },
+  { word: "ASTRONAUT", weight: 15 },
+  { word: "SCIENCEFICTION", weight: 12 }
+];
+
+const testCase8 = [
+  { word: "SUPERCALIFRAGILISTICEXPIALIDOCIOUS", weight: 100 }
+];
+
+
+
+console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
+console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
+console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
+console.log("Test Case 4: ", WordScheduling(testCase4)); // Should output: "No combinations that total to 48 characters."
+console.log("Test Case 5: ", WordScheduling(testCase5)); // Should output: "No combinations that total to 48 characters."
+console.log("Test Case 6: ", WordScheduling(testCase6)); // Should output an array of words that total to 48 characters.
+console.log("Test Case 8: ", WordScheduling(testCase8)); // Should output: ["SUPERCALIFRAGILISTICEXPIALIDOCIOUS"]

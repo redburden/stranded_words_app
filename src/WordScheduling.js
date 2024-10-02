@@ -133,19 +133,15 @@ console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an arr
 // Test Case 2: No Valid Combinations
 // Input: An array of words with lengths that make it impossible to reach a total of 48 characters.
 // Example: [{ word: "BUTTERFLY", weight: 10 }, { word: "DRAGONFLY", weight: 9 }]
-let testCase2 = [
-  { word: "BUTTERFLY", weight: 10 },
-  { word: "DRAGONFLY", weight: 9 }
- 
-];
- // Should output: "No combinations that total to 48 characters."
+let testCase2 = [{ word: "BUTTERFLY", weight: 10 }, { word: "DRAGONFLY", weight: 9 }];
+console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
 
 // =============================
 // Test Case 3: Empty Input
 // Input: [] (an empty array)
 // Expected Output: The string "No combinations that total to 48 characters."
 let testCase3 = [];
-console.log("Test Case 4: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
+console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
 
 
 // Test Case 4: Input with Single Word
@@ -241,7 +237,7 @@ console.log("Test Case 12: ", WordScheduling(testCase12));
 // Expected Output: An array of words that sum to 48 characters.
 
 
-//code to test the function feel free to remove //
+//code to test the function just remove //
 function main() {
   let testCase1 = sampleWords;
   console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
