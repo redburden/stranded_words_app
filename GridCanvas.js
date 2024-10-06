@@ -1,3 +1,5 @@
+import WordScheduling from "./WordScheduling";
+
 let gridCharacter = {
   xpos: null,
   ypos: null,
