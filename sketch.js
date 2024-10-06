@@ -5,9 +5,6 @@ function setup() {
   textAlign(CENTER, CENTER);
 }
 
-// TODO: Add a function to draw the grid
-//    6 columns, 8 rows
-//    Bubbles will hold the characters of the puzzle
 bubbles = [];
 function draw() {
   textSize(32);
