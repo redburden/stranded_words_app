@@ -43,9 +43,8 @@ function randChars() {
   return chars;
 }
 
-// This is temporary and should be replaced with a function that
-// populates the grid with the characters from the word bank.
-// Should operate under the rules of placement.
+// TODO: This should get the grid from GridCanvas.js and display it on the front-end.
+
 function populateGrid() {
   letters = randChars();
   gridChars = [];
@@ -75,5 +74,6 @@ function populateGrid() {
       i++;
     }
   }
+  // Unsure for now if this needs to return the array.
   return bubbles;
 }
