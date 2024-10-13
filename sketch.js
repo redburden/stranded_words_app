@@ -12,7 +12,6 @@ function draw() {
   noLoop();
 }
 
-// TODO: Use mouseClick to alter bubble at mouse position
 function mouseClicked() {
   // Get mouseX and mouseY and round them to the nearest 50
   // Find the bubble at that position
@@ -44,6 +43,9 @@ function randChars() {
   return chars;
 }
 
+// This is temporary and should be replaced with a function that
+// populates the grid with the characters from the word bank.
+// Should operate under the rules of placement.
 function populateGrid() {
   letters = randChars();
   gridChars = [];
