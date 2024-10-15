@@ -17,14 +17,6 @@ function setup() {
 }
 
 function draw() {
-  // Display mouse position
-  //ellipse(mouseX, mouseY, 20);
-
-  // Highlight the last clicked bubble
-  if (lastClickedBubble !== null) {
-    lastClickedBubble.fillColor = [255, 165, 0]; // Highlight color
-    lastClickedBubble.display(); // Display the highlighted bubble
-  }
   noLoop();
 }
 
@@ -44,8 +36,8 @@ function mouseClicked() {
 
   if (bubbleNum < bubbles.length) {
     // Check if the index is valid
-    if (lastClickedBubble) {
-      // lastClickedBubble.fillColor = [255]; // Reset color of the previously clicked bubble
+    if (bubbles[bubbleNum] == lastClickedBubble) {
+      lastClickedBubble.fillColor = [255]; // Reset color of the previously clicked bubble
       lastClickedBubble.display(); // Display it again
     }
 
@@ -56,15 +48,11 @@ function mouseClicked() {
       clickedValues[1] == clickedValues[0] - 1
     ) {
       lastClickedBubble = bubbles[bubbleNum]; // Store the last
-
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
       showCurrentBubble();
-      lastClickedBubble = bubbles[bubbleNum]; // Store the last
-      //logCurrentBubble();
     } else if (clickedValues.length < 2) {
       lastClickedBubble = bubbles[bubbleNum]; // Store the last
-
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
       showCurrentBubble();
@@ -74,6 +62,7 @@ function mouseClicked() {
     }
   }
 
+  // TODO: This method should only apply to the word in progress.
   function clearBubbleFormatting() {
     for (let i = 0; i < bubbles.length; i++) {
       bubbles[i].fillColor = [255];
