@@ -1,0 +1,44 @@
+let userNameBox, passwordBox, button, greeting, userName, password;
+
+function setup() {
+    console.log("Setup function is running"); // Add this for debugging
+    let size = windowWidth - windowWidth / 10;
+    createCanvas(400, 400);;
+    background(208, 204, 204);
+
+    // Username input box
+    userNameBox = createInput();
+    userNameBox.attribute('placeholder', 'Enter Username');
+    userNameBox.position(size / 4, 65);
+
+    // Password input box
+    passwordBox = createInput();
+    passwordBox.attribute('type', 'password');
+    passwordBox.attribute('placeholder', 'Enter Password');
+    passwordBox.position(size / 4, 100);
+
+    // Submit button
+    button = createButton('Submit');
+    button.position(size / 4, 140);
+    button.mousePressed(handleLogin);
+
+    // Greeting element
+    greeting = createElement('h2', 'Login');
+    greeting.position(20, 5);
+}
+
+function handleLogin() {
+    console.log("Button pressed"); // Added this for debugging
+    let userName = userNameBox.value();
+    let password = passwordBox.value();
+
+    if (userName === "testUser" && password === "1234") {
+        greeting.html('Welcome, ' + userName + '!');
+    } else {
+        greeting.html('Invalid username or password.');
+    }
+}
+
+function draw() {
+
+}

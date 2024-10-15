@@ -1,11 +1,11 @@
 {
   "dependencies": {
+    "mocha": "^10.7.3",
     "random-words": "^2.0.1"
   },
   "type": "module",
   "version": "1.0.0",
   "main": "index.html",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
