@@ -130,8 +130,6 @@ function handleClick(value) {
   if (clickedValues.length > 2) {
     clickedValues.shift();
   }
-
-  console.log(clickedValues);
 }
 
 // <button onclick="handleClick('value1')">Button 1</button>
