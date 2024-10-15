@@ -13,10 +13,10 @@ function setup() {
   textAlign(CENTER, CENTER);
   background(200);
   populateGrid();
+  textSize(32);
 }
 
 function draw() {
-  textSize(32);
   // Display mouse position
   //ellipse(mouseX, mouseY, 20);
 
@@ -104,6 +104,7 @@ function randChars() {
 
 function populateGrid() {
   let letters = randChars();
+  textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
     size: 50,
     xpos: xPos,
