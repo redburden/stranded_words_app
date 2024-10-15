@@ -131,20 +131,3 @@ function handleClick(value) {
     clickedValues.shift();
   }
 }
-
-// <button onclick="handleClick('value1')">Button 1</button>
-// <button onclick="handleClick('value2')">Button 2</button>
-
-// let currentClicked = null;
-// let previousClicked = null;
-
-// document.addEventListener('click', (event) => {
-//   previousClicked = currentClicked;
-//   currentClicked = event.target;
-
-//   // Do something with the clicked elements
-//   console.log("Previous:", previousClicked);
-//   console.log("Current:", currentClicked);
-// });
-
-//toDo while (bubbleNum = currentClickedBubble + currentClickedBubble || currentClickedBubble - 6 || currentClickedBubble + 1 || currentClickedBubble - 1)
