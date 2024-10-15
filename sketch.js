@@ -12,12 +12,11 @@ function setup() {
   background(200);
   textAlign(CENTER, CENTER);
   background(200);
+  populateGrid();
 }
 
 function draw() {
   textSize(32);
-  populateGrid();
-
   // Display mouse position
   //ellipse(mouseX, mouseY, 20);
 
@@ -26,6 +25,7 @@ function draw() {
     lastClickedBubble.fillColor = [255, 165, 0]; // Highlight color
     lastClickedBubble.display(); // Display the highlighted bubble
   }
+  noLoop();
 }
 
 function mouseClicked() {
@@ -49,22 +49,40 @@ function mouseClicked() {
       lastClickedBubble.display(); // Display it again
     }
 
-    lastClickedBubble = bubbles[bubbleNum]; // Store the last
     if (
-      clickedValues[1] == clickedValues[0] + 6 ||
-      clickedValues[0] - 6 ||
-      clickedValues[0] + 1 ||
-      clickedValues[0] - 1
+      (clickedValues.length == 2 && clickedValues[1] == clickedValues[0] + 6) ||
+      clickedValues[1] == clickedValues[0] - 6 ||
+      clickedValues[1] == clickedValues[0] + 1 ||
+      clickedValues[1] == clickedValues[0] - 1
     ) {
+      lastClickedBubble = bubbles[bubbleNum]; // Store the last
+
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
       showCurrentBubble();
+      lastClickedBubble = bubbles[bubbleNum]; // Store the last
       //logCurrentBubble();
+    } else if (clickedValues.length < 2) {
+      lastClickedBubble = bubbles[bubbleNum]; // Store the last
+
+      lastClickedBubble.update(); // Update to change its color
+      lastClickedBubble.display(); // Display the updated bubble
+      showCurrentBubble();
+    } else {
+      clickedValues = [];
+      clearBubbleFormatting();
+    }
+  }
+
+  function clearBubbleFormatting() {
+    for (let i = 0; i < bubbles.length; i++) {
+      bubbles[i].fillColor = [255];
+      bubbles[i].display();
     }
   }
 
   function showCurrentBubble() {
-    background(200);
+    //background(200);
     currentBubble = bubbleNum;
     text(currentBubble, 100, 100);
   }
