@@ -4,7 +4,7 @@ function setup() {
     console.log("Setup function is running"); // Add this for debugging
     let size = windowWidth - windowWidth / 10;
     createCanvas(400, 400);;
-    background(208, 204, 204);
+    background(150, 204, 204);
 
     // Username input box
     userNameBox = createInput();
@@ -23,7 +23,7 @@ function setup() {
     button.mousePressed(handleLogin);
 
     // Greeting element
-    greeting = createElement('h2', 'Login');
+    greeting = createElement('h2', 'Stranded Words');
     greeting.position(20, 5);
 }
 
@@ -40,5 +40,5 @@ function handleLogin() {
 }
 
 function draw() {
-
+    background(220);
 }
