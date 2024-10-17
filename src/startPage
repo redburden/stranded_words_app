@@ -23,8 +23,8 @@ function setup() {
     button.mousePressed(handleLogin);
 
     // Greeting element
-    greeting = createElement('h2', 'Stranded Words');
-    greeting.position(20, 5);
+    greeting = createElement('h1', 'Stranded Words');
+    greeting.position(80, 10);
 }
 
 function handleLogin() {
@@ -40,5 +40,5 @@ function handleLogin() {
 }
 
 function draw() {
-    background(220);
+    background(251,175,33,50);
 }
