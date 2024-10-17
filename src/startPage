@@ -1,44 +1,144 @@
 let userNameBox, passwordBox, button, greeting, userName, password;
+let highScore = 0;
 
 function setup() {
-    console.log("Setup function is running"); // Add this for debugging
     let size = windowWidth - windowWidth / 10;
-    createCanvas(400, 400);;
+    createCanvas(400, 400);
     background(150, 204, 204);
 
-    // Username input box
+    // Display welcome message or prompt login/registration options
+    createInitialButtons(size);
+
+    greeting = createElement('h1', 'Stranded Words');
+    greeting.position(80, 10);
+
+}
+
+function createInitialButtons(size) {
+    // Button to show the login form
+    let loginButton = createButton('Login');
+    loginButton.position(size / 4, 120);
+    loginButton.mousePressed(() => {
+        clear();  // Clear canvas and previous elements
+        createLoginForm(size);
+    });
+
+    // Button to show the registration form
+    let registerButton = createButton('Register');
+    registerButton.position(size / 4, 150);
+    registerButton.mousePressed(() => {
+        clear();  // Clear canvas and previous elements
+        createSetupForm(size);
+    });
+}
+
+// Function to create the login form
+function createLoginForm(size) {
+    // Username input box for logging in
     userNameBox = createInput();
     userNameBox.attribute('placeholder', 'Enter Username');
-    userNameBox.position(size / 4, 65);
+    userNameBox.position(size / 4, 120);
 
-    // Password input box
+    // Password input box for logging in
     passwordBox = createInput();
     passwordBox.attribute('type', 'password');
     passwordBox.attribute('placeholder', 'Enter Password');
-    passwordBox.position(size / 4, 100);
+    passwordBox.position(size / 4, 150);
 
-    // Submit button
-    button = createButton('Submit');
-    button.position(size / 4, 140);
-    button.mousePressed(handleLogin);
-
-    // Greeting element
-    greeting = createElement('h1', 'Stranded Words');
-    greeting.position(80, 10);
+    // Submit button for login
+    button = createButton('Login');
+    button.position(size / 4, 180);
+    button.mousePressed(handleLogin);  // Handle login
 }
 
+// Function to create the registration form
+function createSetupForm(size) {
+    // Username input box for setting up a new account
+    userNameBox = createInput();
+    userNameBox.attribute('placeholder', 'Set Username');
+    userNameBox.position(size / 4, 120);
+
+    // Password input box for setting up a new account
+    passwordBox = createInput();
+    passwordBox.attribute('type', 'password');
+    passwordBox.attribute('placeholder', 'Set Password');
+    passwordBox.position(size / 4, 150);
+
+    // Submit button for registration
+    button = createButton('Register');
+    button.position(size / 4, 180);
+    button.mousePressed(handleSetup);  // Handle registration
+}
+
+// Function to handle login
 function handleLogin() {
-    console.log("Button pressed"); // Added this for debugging
     let userName = userNameBox.value();
     let password = passwordBox.value();
 
-    if (userName === "testUser" && password === "1234") {
+    let storedUserName = localStorage.getItem('username');
+    let storedPassword = localStorage.getItem('password');
+
+    if (userName === storedUserName && password === storedPassword) {
         greeting.html('Welcome, ' + userName + '!');
+        showWelcomeMessage(userName);
     } else {
+        greeting.style('font-size', '16px');
         greeting.html('Invalid username or password.');
+        greeting.position(80, 50);  // Adjust position if needed
     }
 }
 
+// Function to handle registration (user setup)
+function handleSetup() {
+    let userName = userNameBox.value();
+    let password = passwordBox.value();
+
+    if (userName && password) {
+        // Save the username and password to localStorage
+        localStorage.setItem('username', userName);
+        localStorage.setItem('password', password);
+        localStorage.setItem('highScore', highScore);  // Save initial high score
+
+        greeting.html('Registration successful! You can now log in.');
+        clear();  // Clear the screen and forms
+
+        // Show login form after registration
+        let size = windowWidth - windowWidth / 10;
+        createLoginForm(size);
+    } else {
+        greeting.html('Please enter a valid username and password.');
+    }
+}
+
+// Function to display welcome message and high score
+function showWelcomeMessage(userName) {
+    clear();  // Clears the canvas and previous elements
+    background(150, 204, 204);
+
+    let storedHighScore = localStorage.getItem('highScore');
+
+    // Display welcome message and high score
+    greeting = createElement('h1', 'Welcome, ' + userName + '!');
+    greeting.position(80, 10);
+
+    let highScoreDisplay = createElement('h2', 'High Score: ' + storedHighScore);
+    highScoreDisplay.position(80, 50);
+
+    // Add a reset button to clear the user data
+    let resetButton = createButton('Log Out');
+    resetButton.position(80, 100);
+    resetButton.mousePressed(logout);
+}
+
+// Function to log out and reset user data
+function logout() {
+    // Clear localStorage and refresh the page
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    localStorage.removeItem('highScore');
+    location.reload();  // Reload the page to reset the form
+}
+
 function draw() {
-    background(251,175,33,50);
+    background(251, 175, 33, 50);
 }
