@@ -25,7 +25,7 @@ function draw() {
 
 function mouseClicked() {
   if (isMouseInsideText(message, messageX, messageY)) {
-    window.open();
+    window.open('anotherPage.sketch.js');
   }
 }
 
