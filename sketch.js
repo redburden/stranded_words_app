@@ -8,7 +8,10 @@ let clickedValues = [];
 
 function setup() {
   // Create the canvas and set background
-  createCanvas(600, 800);
+  let grid_container = createDiv();
+  grid_container.addClass("grid-container");
+  let canvas = createCanvas(600, 800);
+  canvas.parent(grid_container);
   background(200);
   textAlign(CENTER, CENTER);
   background(200);
@@ -94,7 +97,57 @@ function randChars() {
 // TODO: This should get the grid from GridCanvas.js and display it on the front-end.
 
 function populateGrid() {
-  let letters = randChars();
+  //let letters = randChars();
+  let letters = [
+    "",
+    "",
+    "",
+    "",
+    "A",
+    "N",
+    "T",
+    "",
+    "",
+    "",
+    "B",
+    "A",
+    "S",
+    "A",
+    "",
+    "",
+    "A",
+    "N",
+    "T",
+    "O",
+    "",
+    "",
+    "",
+    "",
+    "E",
+    "K",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "A",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "C",
+    "K",
+    "L",
+    "E",
+    "",
+    "P",
+    "I",
+    "C",
+    "",
+    "",
+    "",
+  ];
   textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
     size: 50,
