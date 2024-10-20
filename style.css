@@ -1,13 +1,61 @@
-html {
-  min-height: 100%;
-}
-
-body, main {
+html, body {
   margin: 0;
   padding: 0;
-  min-height: 90vh;
-  min-width: 100vw;
+  /* Allow the full height and width of the viewport to be covered by the page*/
   height: 100%;
+  width: 100%;
+  /* Center both vertically and horizontally */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
 }
 
+/* Flex container for centering the theme box and grid */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
 
+.theme-box {
+  width: 150px;
+  background-color: lightgray;
+  border: 2px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Display the bubbles as a 6x8 grid with fixed sizes */
+#grid-container {
+  display: grid;
+  grid-template-columns: repeat(6, 60px);
+  grid-template-rows: repeat(8, 60px);
+  gap: 5px;
+  /* border to create a frame around the grid */
+  background-color: white;
+  border: 3px solid black;
+  padding: 10px;
+}
+
+.grid-cell {
+  /* Set bubble size, color, and make them circular */
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  border: 1px solid black;
+}
+
+.grid-cell.clicked {
+  /* Change bubble color when clicked */
+  background-color: orange;
+}
