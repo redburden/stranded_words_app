@@ -56,67 +56,75 @@ let sampleWords = [
   { word: "SPACETIME", weight: 1 },
 ];
 
-let puzzleWords = WordScheduling(sampleWords);
+let puzzleWords = ["PICKLE", "BANANA", "CAKE", "TOAST"];
 let puzzle_grid = grid();
 puzzle_grid.makeGrid();
 
 // Currently the loop is infinite because where it is placing some words it is boxing
 // itself in and not able to place the rest of the words.
-
-puzzleWords.forEach((word) => {
-  let wordChars = word.split("");
-  let wordLength = wordChars.length;
-  // Pick a random point on the grid to start the word.
-  let goodSpot = false;
-  let xStart = 0;
-  let yStart = 0;
-  while (goodSpot == false) {
-    xStart = Math.floor(Math.random() * gridWidth);
-    yStart = Math.floor(Math.random() * gridHeight);
-    if (puzzle_grid.g[yStart].row[xStart].letter == "") {
-      goodSpot = true;
-      puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
-      puzzle_grid.g[yStart].row[xStart].word = word;
-    }
-  }
-
-  // Iterate through the next letters, placing each in a legal position.
-  for (let i = 1; i < wordLength; i++) {
-    // Check the legal moves from the current position.
-    let legalMoves = [];
-    if (puzzle_grid.g[yStart].row[xStart].ypos > 0) {
-      legalMoves.push(gridWidth * -1);
-    }
-    if (puzzle_grid.g[yStart].row[xStart].ypos < gridHeight - 1) {
-      legalMoves.push(gridWidth);
-    }
-    if (puzzle_grid.g[yStart].row[xStart].xpos > 0) {
-      legalMoves.push(-1);
-    }
-    if (puzzle_grid.g[yStart].row[xStart].xpos < gridWidth - 1) {
-      legalMoves.push(1);
-    }
-
-    // Randomly choose a legal move.
-    let goodMove = false;
-    while (goodMove == false) {
-      let move = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-      let xMove = move == -6 || move == 6 ? 0 : move;
-      let yMove = move == -1 || move == 1 ? 0 : move / gridWidth;
-
-      // Also need to check that we aren't boxing in any neighbors.
-      // For each other legal move: if the neighbor is empty, check we are not boxing it in.
-      // UNLESS: it is the last letter of the word.
-      if (puzzle_grid.g[yStart + yMove].row[xStart + xMove].letter == "") {
-        yStart += yMove;
-        xStart += xMove;
-        puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
+export default function makePuzzleGrid(puzzleWords) {
+  puzzleWords.forEach((word) => {
+    let wordChars = word.split("");
+    let wordLength = wordChars.length;
+    // Pick a random point on the grid to start the word.
+    let goodSpot = false;
+    let xStart = 0;
+    let yStart = 0;
+    while (goodSpot == false) {
+      xStart = Math.floor(Math.random() * gridWidth);
+      yStart = Math.floor(Math.random() * gridHeight);
+      if (puzzle_grid.g[yStart].row[xStart].letter == "") {
+        goodSpot = true;
+        puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
         puzzle_grid.g[yStart].row[xStart].word = word;
-
-        goodMove = true;
       }
     }
-  }
-});
 
-console.log(puzzle_grid.g[0].row[0].letter);
+    // Iterate through the next letters, placing each in a legal position.
+    for (let i = 1; i < wordLength; i++) {
+      // Check the legal moves from the current position.
+      let legalMoves = [];
+      if (puzzle_grid.g[yStart].row[xStart].ypos > 0) {
+        legalMoves.push(gridWidth * -1);
+      }
+      if (puzzle_grid.g[yStart].row[xStart].ypos < gridHeight - 1) {
+        legalMoves.push(gridWidth);
+      }
+      if (puzzle_grid.g[yStart].row[xStart].xpos > 0) {
+        legalMoves.push(-1);
+      }
+      if (puzzle_grid.g[yStart].row[xStart].xpos < gridWidth - 1) {
+        legalMoves.push(1);
+      }
+
+      // Randomly choose a legal move.
+      let goodMove = false;
+      while (goodMove == false) {
+        let move = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+        let xMove = move == -6 || move == 6 ? 0 : move;
+        let yMove = move == -1 || move == 1 ? 0 : move / gridWidth;
+
+        // Also need to check that we aren't boxing in any neighbors.
+        // For each other legal move: if the neighbor is empty, check we are not boxing it in.
+        // UNLESS: it is the last letter of the word.
+        if (puzzle_grid.g[yStart + yMove].row[xStart + xMove].letter == "") {
+          yStart += yMove;
+          xStart += xMove;
+          puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
+          puzzle_grid.g[yStart].row[xStart].word = word;
+
+          goodMove = true;
+        }
+      }
+    }
+  });
+  let front_end_letters = [];
+  puzzle_grid.g.forEach((row) => {
+    row.row.forEach((cell) => {
+      front_end_letters.push(cell.letter);
+    });
+  });
+  return front_end_letters;
+}
+
+console.log(makePuzzleGrid(puzzleWords));
