@@ -107,4 +107,4 @@ export default function WordScheduling(weightedWords) {
   }
 }
 
-console.log(WordScheduling(sampleWords));
+//console.log(WordScheduling(sampleWords));
