@@ -252,7 +252,6 @@ function main() {
   let testCase3 = [];
   console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
 
-  // Add more test cases as needed
 }
 
 // Call main to run the tests
