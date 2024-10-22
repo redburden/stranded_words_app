@@ -65,7 +65,8 @@ function draw() {
     drawingContext.shadowBlur = 0;
   }
 
-  // Display the "Stranded" text
+  // Display the "Stranded" text and am going to make it link to a domain for now, but we can change 
+  //it to a file or however we want it
   text(message, messageX, messageY);
 }
 
@@ -83,7 +84,7 @@ function showHelpModal() {
 }
 
 function hideHelpModal() {
-  modalDiv.style("display", "none"); // Hide the modal
+  modalDiv.style("display", "none"); 
   helpButton.show(); // Show the help button again
 }
 
