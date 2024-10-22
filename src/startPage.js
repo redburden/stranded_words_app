@@ -1,6 +1,6 @@
-const message = 'Stranded';
-const messageX = 30; 
-const messageY = 150; 
+const message = "Stranded";
+const messageX = 30;
+const messageY = 150;
 let helpButton, modalDiv;
 
 function setup() {
@@ -8,17 +8,17 @@ function setup() {
   textSize(60);
 
   // Create help button with CSS styling
-  helpButton = createButton('Help');
-  helpButton.position(width / 2 - 40, height - 60);  // Center the button below the modal
-  helpButton.style('background-color', 'orange');
-  helpButton.style('color', 'white');
-  helpButton.style('border', 'none');
-  helpButton.style('padding', '10px 20px');
-  helpButton.style('font-size', '16px');
-  helpButton.style('border-radius', '5px');
-  helpButton.style('cursor', 'pointer');
+  helpButton = createButton("Help");
+  helpButton.position(width / 2 - 30, height - 130); // Center the button below the modal
+  helpButton.style("background-color", "orange");
+  helpButton.style("color", "white");
+  helpButton.style("border", "none");
+  helpButton.style("padding", "10px 20px");
+  helpButton.style("font-size", "16px");
+  helpButton.style("border-radius", "10px");
+  helpButton.style("cursor", "pointer");
 
-  helpButton.mousePressed(showHelpModal);  // Show the help modal when pressed
+  helpButton.mousePressed(showHelpModal); // Show the help modal when pressed
 
   // Create a hidden div for the help modal
   modalDiv = createDiv(`
@@ -31,19 +31,19 @@ function setup() {
     <p>6. Earn hints by finding three words.</p>
     <button id='close-btn'>Close</button>
   `);
-  
-  // Style the modal
-  modalDiv.style('position', 'absolute');
-  modalDiv.style('width', '250px');
-  modalDiv.style('padding', '20px');
-  modalDiv.style('background-color', 'lightblue');
-  modalDiv.style('border-radius', '10px');
-  modalDiv.style('top', '50px');
-  modalDiv.style('left', '25px');
-  modalDiv.style('display', 'none');  // Hidden by default
-  
+
+  // Adding style to the logo modal
+  modalDiv.style("position", "absolute");
+  modalDiv.style("width", "250px");
+  modalDiv.style("padding", "20px");
+  modalDiv.style("background-color", "lightblue");
+  modalDiv.style("border-radius", "10px");
+  modalDiv.style("top", "50px");
+  modalDiv.style("left", "25px");
+  modalDiv.style("display", "none"); // Hidden by default
+
   // Add event listener to the close button
-  select('#close-btn').mousePressed(hideHelpModal);
+  select("#close-btn").mousePressed(hideHelpModal);
 }
 
 function draw() {
@@ -51,14 +51,14 @@ function draw() {
 
   // Glowing effect for the "Stranded" text
   if (isMouseInsideText(message, messageX, messageY)) {
-    cursor(HAND);
+    cursor(HAND); // Change cursor to hand when hovering over "Stranded"
     fill(200, 190, 0);
     stroke(0, 200, 255);
     strokeWeight(2);
     drawingContext.shadowBlur = 20;
-    drawingContext.shadowColor = 'rgba(0, 200, 255, 0.7)';
+    drawingContext.shadowColor = "rgba(0, 200, 255, 0.7)";
   } else {
-    cursor(ARROW);
+    cursor(ARROW); // Regular cursor when not hovering over "Stranded"
     fill(255);
     stroke(255);
     strokeWeight(1);
@@ -69,21 +69,34 @@ function draw() {
   text(message, messageX, messageY);
 }
 
+// Detect mouse click on the "Stranded" text
+function mouseClicked() {
+  if (isMouseInsideText(message, messageX, messageY)) {
+    // Open another page when "Stranded" is clicked
+    window.open("https://www.example.com", "_blank"); // Opens in a new tab
+  }
+}
+
 function showHelpModal() {
-  modalDiv.style('display', 'block');  // Show the modal
-  helpButton.hide();  // Hide the help button
+  modalDiv.style("display", "block"); // Show the modal
+  helpButton.hide(); // Hide the help button
 }
 
 function hideHelpModal() {
-  modalDiv.style('display', 'none');  // Hide the modal
-  helpButton.show();  // Show the help button again
+  modalDiv.style("display", "none"); // Hide the modal
+  helpButton.show(); // Show the help button again
 }
 
+// Check if the mouse is inside the "Stranded" text
 function isMouseInsideText(message, messageX, messageY) {
   const messageWidth = textWidth(message);
   const messageTop = messageY - textAscent();
   const messageBottom = messageY + textDescent();
 
-  return mouseX > messageX && mouseX < messageX + messageWidth &&
-         mouseY > messageTop && mouseY < messageBottom;
+  return (
+    mouseX > messageX &&
+    mouseX < messageX + messageWidth &&
+    mouseY > messageTop &&
+    mouseY < messageBottom
+  );
 }
