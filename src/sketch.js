@@ -16,7 +16,6 @@ function setup() {
   textAlign(CENTER, CENTER);
   background(200);
   populateGrid();
-  textSize(32);
 }
 
 function draw() {
@@ -176,8 +175,6 @@ function populateGrid() {
       i++;
     }
   }
-  // Unsure for now if this needs to return the array.
-  return bubbles;
 }
 
 function handleClick(value) {
@@ -188,7 +185,3 @@ function handleClick(value) {
     clickedValues.shift();
   }
 }
-
-
-
-// This is for pull requests.
