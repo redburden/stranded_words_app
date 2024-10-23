@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="./style.css" />
-    <script src="libraries/p5.min.js"></script>
-    <script src="libraries/p5.sound.min.js"></script>
-    <title>Stranded Word Game</title>
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Grid Game</title>
     
-    <!-- I'm trying to Load scripts in the sequence of screens, but feel free to let me know if I'm off here -->
-    <script src="src/LoginScreen.js"></script> <!-- Login screen first -->
-    <script src="src/StartPage.js"></script>   <!-- Start screen after login -->
-    <script src="src/WordAssociation.js"></script> <!-- Game screens -->
-    <script src="src/WordScheduling.js"></script>  <!-- Game screens -->
-    <script src="src/GridCanvas.js"></script>      <!-- Game screens -->
-    <script src="src/sketch.js"></script>          <!-- Main game logic -->
+    <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="style.css"> 
+    
+    <!-- Include the correct p5.js library and p5.dom.min.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.dom.min.js"></script>
+    
+    <!-- Link to the JavaScript file (sketch.js) located in the 'src' folder -->
+    <script src="../src/sketch.js" defer></script>
+</head>
 
-    <!-- Additional scripts or initialization here -->
-  </body>
+<body>
+    <!-- Game container where the canvas and other elements will be rendered -->
+    <div id="game-container"></div>
+</body>
 </html>

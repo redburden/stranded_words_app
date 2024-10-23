@@ -75,16 +75,7 @@ body{
   /* Change bubble color when clicked */
   background-color: orange;
 }
-/* Help button styling */
-.help-button {
-  background-color: orange;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-}
+
 /* Modal styling */
 .modal {
   position: absolute;

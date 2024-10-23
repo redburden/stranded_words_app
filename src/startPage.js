@@ -4,6 +4,8 @@ const messageY = 150;
 let helpButton, modalDiv;
 
 function setup() {
+  let startPage = select('#startPage');
+
   createCanvas(300, 300);
   textSize(60);
 
@@ -70,7 +72,7 @@ function showHelpModal() {
 
 function hideHelpModal() {
   modalDiv.style("display", "none"); // Hide the modal
-  helpButton.show(); // Show the help button again
+  helpButton.show("display", "modal"); // Show the help button again
 }
 
 // Check if the mouse is inside the "Stranded" text
