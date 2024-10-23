@@ -75,3 +75,33 @@ body{
   /* Change bubble color when clicked */
   background-color: orange;
 }
+/* Help button styling */
+.help-button {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+/* Modal styling */
+.modal {
+  position: absolute;
+  width: 250px;
+  padding: 20px;
+  background-color: lightblue;
+  border-radius: 10px;
+  top: 50px;
+  left: 25px;
+  display: none; /* Hidden by default */
+}
+
+/* Close button styling for modal */
+#close-btn {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}

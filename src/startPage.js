@@ -7,20 +7,14 @@ function setup() {
   createCanvas(300, 300);
   textSize(60);
 
-  // Create help button with CSS styling
+  // Create help button and apply CSS class
   helpButton = createButton("Help");
-  helpButton.position(width / 2 - 30, height - 130); // Center the button below the modal
-  helpButton.style("background-color", "orange");
-  helpButton.style("color", "white");
-  helpButton.style("border", "none");
-  helpButton.style("padding", "10px 20px");
-  helpButton.style("font-size", "16px");
-  helpButton.style("border-radius", "10px");
-  helpButton.style("cursor", "pointer");
+  helpButton.position(width / 2 - 30, height - 130); // Center the button
+  helpButton.addClass("help-button"); // Add the CSS class defined in style.css
 
   helpButton.mousePressed(showHelpModal); // Show the help modal when pressed
 
-  // Create a hidden div for the help modal
+  // Create a hidden div for the help modal and apply CSS class
   modalDiv = createDiv(`
     <h2>Instructions</h2>
     <p>1. Enter a theme word.</p>
@@ -32,15 +26,7 @@ function setup() {
     <button id='close-btn'>Close</button>
   `);
 
-  // Adding style to the logo modal
-  modalDiv.style("position", "absolute");
-  modalDiv.style("width", "250px");
-  modalDiv.style("padding", "20px");
-  modalDiv.style("background-color", "lightblue");
-  modalDiv.style("border-radius", "10px");
-  modalDiv.style("top", "50px");
-  modalDiv.style("left", "25px");
-  modalDiv.style("display", "none"); // Hidden by default
+  modalDiv.addClass("modal"); // Apply the modal CSS class for styling
 
   // Add event listener to the close button
   select("#close-btn").mousePressed(hideHelpModal);
@@ -65,8 +51,7 @@ function draw() {
     drawingContext.shadowBlur = 0;
   }
 
-  // Display the "Stranded" text and am going to make it link to a domain for now, but we can change 
-  //it to a file or however we want it
+  // Display the "Stranded" text
   text(message, messageX, messageY);
 }
 
@@ -84,7 +69,7 @@ function showHelpModal() {
 }
 
 function hideHelpModal() {
-  modalDiv.style("display", "none"); 
+  modalDiv.style("display", "none"); // Hide the modal
   helpButton.show(); // Show the help button again
 }
 
