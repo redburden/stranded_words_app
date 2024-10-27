@@ -62,7 +62,7 @@ puzzle_grid.makeGrid();
 
 // Currently the loop is infinite because where it is placing some words it is boxing
 // itself in and not able to place the rest of the words.
-export default function makePuzzleGrid(puzzleWords) {
+export default function GridCanvas(puzzleWords) {
   puzzleWords.forEach((word) => {
     let wordChars = word.split("");
     let wordLength = wordChars.length;
@@ -127,4 +127,4 @@ export default function makePuzzleGrid(puzzleWords) {
   return front_end_letters;
 }
 
-console.log(makePuzzleGrid(puzzleWords));
+console.log(GridCanvas(puzzleWords));
