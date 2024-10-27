@@ -118,13 +118,13 @@ export default function GridCanvas(puzzleWords) {
       }
     }
   });
-  let front_end_letters = [];
+  let frontEndLetters = [];
   puzzle_grid.g.forEach((row) => {
     row.row.forEach((cell) => {
-      front_end_letters.push(cell.letter);
+      frontEndLetters.push(cell.letter);
     });
   });
-  return front_end_letters;
+  return frontEndLetters;
 }
 
 console.log(GridCanvas(puzzleWords));
