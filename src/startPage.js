@@ -1,6 +1,3 @@
-const message = "Stranded";
-const messageX = 30;
-const messageY = 150;
 let helpButton, modalDiv;
 
 function setup() {
@@ -27,6 +24,7 @@ function setup() {
   `);
 
   modalDiv.addClass("modal"); // Apply the modal CSS class for styling
+  modalDiv.style("display", "none"); // Initially hide the modal
 
   // Add event listener to the close button
   select("#close-btn").mousePressed(hideHelpModal);
@@ -71,18 +69,4 @@ function showHelpModal() {
 function hideHelpModal() {
   modalDiv.style("display", "none"); // Hide the modal
   helpButton.show(); // Show the help button again
-}
-
-// Check if the mouse is inside the "Stranded" text
-function isMouseInsideText(message, messageX, messageY) {
-  const messageWidth = textWidth(message);
-  const messageTop = messageY - textAscent();
-  const messageBottom = messageY + textDescent();
-
-  return (
-    mouseX > messageX &&
-    mouseX < messageX + messageWidth &&
-    mouseY > messageTop &&
-    mouseY < messageBottom
-  );
 }

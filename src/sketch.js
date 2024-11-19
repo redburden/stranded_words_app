@@ -44,8 +44,7 @@ function mouseClicked() {
       lastClickedBubble.display(); // Display it again
     }
 
-    if (   //what if we used mouse clicks to make sure they were in the bubble like on the start page I used a pointer outside the  Strands Logo
-      //then when I was touching the button with the mouse I changed the mouse to a hand....
+    if ( 
       (clickedValues.length == 2 && clickedValues[1] == clickedValues[0] + 6) ||
       clickedValues[1] == clickedValues[0] - 6 ||
       clickedValues[1] == clickedValues[0] + 1 ||

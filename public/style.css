@@ -1,30 +1,11 @@
-html {
-  min-height: 100%;
-}
-
-body{
+/* Base styling for full viewport coverage */
+html, body {
   margin: 0;
   padding: 0;
-  /* Allow the full height and width of the viewport to be covered by the page*/
   height: 100%;
-  justify-content: center;
-  justify-items: center;
-}
-
-.grid-container {
-  display: flex;
-  gap: 5px;
-  background-color: white;
-  border: 3px solid black;
-  padding: 10px;
-  justify-content: center;
-  width: fit-content;
-  width: 100%;
-  /* Center both vertically and horizontally */
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f0f0f0;
 }
 
 /* Flex container for centering the theme box and grid */
@@ -33,6 +14,7 @@ body{
   justify-content: center;
   align-items: center;
   gap: 20px;
+  height: 100vh; /* Full viewport height */
 }
 
 .theme-box {
@@ -46,13 +28,24 @@ body{
   box-sizing: border-box;
 }
 
+.grid-container {
+  gap: 5px;
+  background-color: #f0f0f0;
+  border: 3px solid black;
+  padding: 10px;
+  width: 100%;
+  max-width: fit-content;
+  margin: auto;
+  display: flex;
+  align-items: center;
+}
+
 /* Display the bubbles as a 6x8 grid with fixed sizes */
 #grid-container {
   display: grid;
   grid-template-columns: repeat(6, 60px);
   grid-template-rows: repeat(8, 60px);
   gap: 5px;
-  /* border to create a frame around the grid */
   background-color: white;
   border: 3px solid black;
   padding: 10px;
@@ -75,6 +68,7 @@ body{
   /* Change bubble color when clicked */
   background-color: orange;
 }
+
 /* Help button styling */
 .help-button {
   background-color: orange;
@@ -85,15 +79,18 @@ body{
   border-radius: 10px;
   cursor: pointer;
 }
+
 /* Modal styling */
 .modal {
-  position: absolute;
+  position: fixed;
   width: 250px;
   padding: 20px;
   background-color: lightblue;
   border-radius: 10px;
-  top: 50px;
-  left: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: none; /* Hidden by default */
 }
 
@@ -104,4 +101,5 @@ body{
   border: none;
   padding: 5px 10px;
   cursor: pointer;
+  border-radius: 5px;
 }
