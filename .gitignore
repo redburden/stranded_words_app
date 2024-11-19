@@ -2,3 +2,7 @@ node_modules
 scratch.js
 .vscode
 launch.json
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
