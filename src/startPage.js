@@ -1,4 +1,6 @@
-let helpButton, modalDiv;
+let modalDiv;
+let brightness = 32; // Default brightness
+let speed = 30; // Default speed for color change
 
 function setup() {
   let canvas = createCanvas(windowWidth, windowHeight); // Create a full-window canvas
@@ -7,7 +9,7 @@ function setup() {
   canvas.style('left', '0');
   canvas.style('z-index', '0'); // Place the canvas below the buttons
 
-  textSize(100); // Adjust the text size to fit the canvas
+  textSize(80); // Adjust the text size to fit the canvas
   textAlign(CENTER, CENTER);
 
   // Reference to buttons
@@ -36,7 +38,7 @@ function setup() {
     </div>
   `);
 
-  modalDiv.addClass("modal"); // Apply the modal CSS class for styling
+  modalDiv.addClass("modal");
   modalDiv.style("display", "none"); // Initially hide the modal
 
   // Add event listener to the close button
@@ -113,19 +115,5 @@ function hideSettingsModal() {
 }
 
 function showCredits() {
-  alert("Game by [Austin Burden][ n/ Enas Awad][ n/ Kyle Furnis][n/ Erika Ferris] and team!"); // Placeholder for credits information
-}
-
-// Check if the mouse is inside the "Stranded" text
-function isMouseInsideText(message, messageX, messageY) {
-  const messageWidth = textWidth(message);
-  const messageTop = messageY - textAscent();
-  const messageBottom = messageY + textDescent();
-
-  return (
-    mouseX > messageX &&
-    mouseX < messageX + messageWidth &&
-    mouseY > messageTop &&
-    mouseY < messageBottom
-  );
+  alert("Game by [Enas Awad /n Kyle Furnish /n Austin Burden /n Erika Ferris ]"); // Placeholder for credits information
 }
