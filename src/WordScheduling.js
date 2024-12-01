@@ -256,5 +256,5 @@ function main() {
 //main(main);
 
 (async () => {
-  console.log(WordScheduling(await WordAssociation("frog")));
+  console.log(WordScheduling(await WordAssociation("solar")));
 })();

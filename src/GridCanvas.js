@@ -38,7 +38,7 @@ let grid = () => ({
 export default function GridCanvas(puzzleWords) {
   let frontEndLetters = [];
   for (let index = 0; index < 48; index++) {
-    frontEndLetters.push(0);
+    frontEndLetters.push("");
   }
 
   puzzleWords.forEach((word) => {
@@ -141,14 +141,14 @@ function emptyNeighbors(y, x, grid) {
 }
 
 let puzzleWords = [
-  "pool",
-  "reptile",
-  "frog",
-  "species",
-  "leather",
-  "amphibian",
-  "underwater",
-  "ship",
+  "energy",
+  "electric",
+  "folk",
+  "community",
+  "dispute",
+  "controversy",
+  "argument",
+  "human",
 ];
 let puzzle_grid = grid();
 puzzle_grid.makeGrid();
