@@ -65,31 +65,19 @@ export default function GridCanvas(puzzleWords) {
       }
     }
 
+    // Check the legal moves from the current position.
+    let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
+
     // Iterate through the next letters, placing each in a legal position.
     for (let i = 1; i < wordLength; i++) {
-      // Check the legal moves from the current position.
-      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
-
-      /*
-      if (puzzle_grid.g[yStart].row[xStart].ypos > 0) {
-        legalMoves.push(gridWidth * -1);
-      }
-      if (puzzle_grid.g[yStart].row[xStart].ypos < gridHeight - 1) {
-        legalMoves.push(gridWidth);
-      }
-      if (puzzle_grid.g[yStart].row[xStart].xpos > 0) {
-        legalMoves.push(-1);
-      }
-      if (puzzle_grid.g[yStart].row[xStart].xpos < gridWidth - 1) {
-        legalMoves.push(1);
-      }
-      */
-
       // Randomly choose a legal move.
       let goodMove = false;
-      while (goodMove == false) {
+      // Remove potential moves as we test them. If we can't find a move, we'll have to backtrack.
+      while (goodMove == false && legalMoves.length > 0) {
         let randomMovePick = Math.floor(Math.random() * legalMoves.length);
         let move = legalMoves[randomMovePick];
+        // Remove that move from legalMoves.
+        legalMoves.splice(randomMovePick, 1);
 
         let yTest = move[0];
         let xTest = move[1];
@@ -106,10 +94,6 @@ export default function GridCanvas(puzzleWords) {
           // Find the basic (front-end) index of this bubble position.
           let simpleI = 6 * (yStart + 1) + xStart;
           frontEndLetters[simpleI] = wordChars[i];
-        }
-
-        if (goodMove == false) {
-          console.log("Invalid move at: " + xTest + "," + yTest);
         }
       }
     }
@@ -156,7 +140,15 @@ function emptyNeighbors(y, x, grid) {
   return validNeighbors;
 }
 
-let puzzleWords = ["PICKLE", "BANANA", "CAKE", "YUMMY"];
+let puzzleWords = [
+  "PICKLE",
+  "BANANA",
+  "CAKE",
+  "YUM",
+  "SWEET",
+  "SOUR",
+  "FLAVOR",
+];
 let puzzle_grid = grid();
 puzzle_grid.makeGrid();
 
