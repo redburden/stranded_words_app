@@ -44,7 +44,8 @@ function mouseClicked() {
       lastClickedBubble.display(); // Display it again
     }
 
-    if (   //what if we used mouse clicks to make sure they were in the bubble like on the start page I used a pointer outside the  Strands Logo
+    if (
+      //what if we used mouse clicks to make sure they were in the bubble like on the start page I used a pointer outside the  Strands Logo
       //then when I was touching the button with the mouse I changed the mouse to a hand....
       (clickedValues.length == 2 && clickedValues[1] == clickedValues[0] + 6) ||
       clickedValues[1] == clickedValues[0] - 6 ||
@@ -100,54 +101,56 @@ function randChars() {
 function populateGrid() {
   //let letters = randChars();
   let letters = [
-    "",
-    "",
-    "",
-    "",
-    "A",
-    "N",
-    "T",
-    "",
-    "",
-    "",
-    "B",
-    "A",
-    "S",
-    "A",
-    "",
-    "",
-    "A",
-    "N",
-    "T",
-    "O",
-    "",
-    "",
-    "",
-    "",
-    "E",
-    "K",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "A",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "C",
-    "K",
-    "L",
-    "E",
-    "",
-    "P",
-    "I",
-    "C",
-    "",
-    "",
-    "",
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    "l",
+    "e",
+    0,
+    0,
+    "p",
+    "l",
+    "e",
+    "p",
+    0,
+    "o",
+    "i",
+    "o",
+    "s",
+    "c",
+    0,
+    "t",
+    "r",
+    "e",
+    "o",
+    "r",
+    "r",
+    "l",
+    "p",
+    "e",
+    0,
+    "f",
+    "n",
+    "u",
+    "e",
+    0,
+    0,
+    "i",
+    "g",
+    "p",
+    "d",
+    "s",
+    0,
+    "m",
+    "a",
+    "h",
+    "i",
+    "h",
+    "b",
+    "i",
   ];
   textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
@@ -188,7 +191,5 @@ function handleClick(value) {
     clickedValues.shift();
   }
 }
-
-
 
 // This is for pull requests.

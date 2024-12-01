@@ -141,13 +141,14 @@ function emptyNeighbors(y, x, grid) {
 }
 
 let puzzleWords = [
-  "PICKLE",
-  "BANANA",
-  "CAKE",
-  "YUM",
-  "SWEET",
-  "SOUR",
-  "FLAVOR",
+  "pool",
+  "reptile",
+  "frog",
+  "species",
+  "leather",
+  "amphibian",
+  "underwater",
+  "ship",
 ];
 let puzzle_grid = grid();
 puzzle_grid.makeGrid();
