@@ -1,4 +1,4 @@
-import WordScheduling from "./WordScheduling.js";
+//import WordScheduling from "./WordScheduling.js";
 
 let gridCharacter = (x, y) => ({
   xpos: x,
@@ -33,36 +33,14 @@ let grid = () => ({
   },
 });
 
-let sampleWords = [
-  { word: "SCIENCEFICTION", weight: 20 },
-  { word: "MUTANT", weight: 19 },
-  { word: "ASTRONAUT", weight: 18 },
-  { word: "ALIEN", weight: 17 },
-  { word: "DROID", weight: 16 },
-  { word: "CYBORG", weight: 15 },
-  { word: "GALAXY", weight: 14 },
-  { word: "ROBOT", weight: 13 },
-  { word: "MARTIAN", weight: 12 },
-  { word: "SPACESHIP", weight: 11 },
-  { word: "ASTEROID", weight: 10 },
-  { word: "EXTRATERRESTRIAL", weight: 9 },
-  { word: "TELEPORT", weight: 8 },
-  { word: "STARSHIP", weight: 7 },
-  { word: "INTERGALACTIC", weight: 6 },
-  { word: "ORBIT", weight: 5 },
-  { word: "SPACECRAFT", weight: 4 },
-  { word: "ASTRONOMY", weight: 3 },
-  { word: "COSMOS", weight: 2 },
-  { word: "SPACETIME", weight: 1 },
-];
-
-let puzzleWords = ["PICKLE", "BANANA", "CAKE", "TOAST"];
-let puzzle_grid = grid();
-puzzle_grid.makeGrid();
-
-// Currently the loop is infinite because where it is placing some words it is boxing
+// DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
 // itself in and not able to place the rest of the words.
 export default function GridCanvas(puzzleWords) {
+  let frontEndLetters = [];
+  for (let index = 0; index < 48; index++) {
+    frontEndLetters.push(0);
+  }
+
   puzzleWords.forEach((word) => {
     let wordChars = word.split("");
     let wordLength = wordChars.length;
@@ -73,17 +51,26 @@ export default function GridCanvas(puzzleWords) {
     while (goodSpot == false) {
       xStart = Math.floor(Math.random() * gridWidth);
       yStart = Math.floor(Math.random() * gridHeight);
-      if (puzzle_grid.g[yStart].row[xStart].letter == "") {
+      if (
+        puzzle_grid.g[yStart].row[xStart].letter == "" &&
+        emptyNeighbors(yStart, xStart, puzzle_grid).length > 0
+      ) {
         goodSpot = true;
         puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
         puzzle_grid.g[yStart].row[xStart].word = word;
+        let simpleI = 6 * (yStart + 1) + xStart;
+        frontEndLetters[simpleI] = wordChars[0];
+      } else {
+        console.log("Unacceptable placement at: " + xStart + "," + yStart);
       }
     }
 
     // Iterate through the next letters, placing each in a legal position.
     for (let i = 1; i < wordLength; i++) {
       // Check the legal moves from the current position.
-      let legalMoves = [];
+      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
+
+      /*
       if (puzzle_grid.g[yStart].row[xStart].ypos > 0) {
         legalMoves.push(gridWidth * -1);
       }
@@ -96,35 +83,84 @@ export default function GridCanvas(puzzleWords) {
       if (puzzle_grid.g[yStart].row[xStart].xpos < gridWidth - 1) {
         legalMoves.push(1);
       }
+      */
 
       // Randomly choose a legal move.
       let goodMove = false;
       while (goodMove == false) {
-        let move = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-        let xMove = move == -6 || move == 6 ? 0 : move;
-        let yMove = move == -1 || move == 1 ? 0 : move / gridWidth;
+        let randomMovePick = Math.floor(Math.random() * legalMoves.length);
+        let move = legalMoves[randomMovePick];
 
-        // Also need to check that we aren't boxing in any neighbors.
-        // For each other legal move: if the neighbor is empty, check we are not boxing it in.
-        // UNLESS: it is the last letter of the word.
-        if (puzzle_grid.g[yStart + yMove].row[xStart + xMove].letter == "") {
-          yStart += yMove;
-          xStart += xMove;
+        let yTest = move[0];
+        let xTest = move[1];
+
+        if (
+          i == wordLength - 1 ||
+          emptyNeighbors(yTest, xTest, puzzle_grid).length > 0
+        ) {
+          yStart = yTest;
+          xStart = xTest;
           puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
           puzzle_grid.g[yStart].row[xStart].word = word;
-
           goodMove = true;
+          // Find the basic (front-end) index of this bubble position.
+          let simpleI = 6 * (yStart + 1) + xStart;
+          frontEndLetters[simpleI] = wordChars[i];
+        }
+
+        if (goodMove == false) {
+          console.log("Invalid move at: " + xTest + "," + yTest);
         }
       }
     }
   });
-  let frontEndLetters = [];
-  puzzle_grid.g.forEach((row) => {
-    row.row.forEach((cell) => {
-      frontEndLetters.push(cell.letter);
-    });
-  });
   return frontEndLetters;
 }
+// Determine how many bubbles each puzzle word will use.
+export function allotSpace(puzzleWords) {
+  let wordSizes = [];
+  puzzleWords.forEach((word) => {
+    wordSizes.push(word.split("").length);
+  });
+
+  return wordSizes;
+}
+
+function emptyNeighbors(y, x, grid) {
+  let gridHeight = grid.g.length;
+  let gridWidth = grid.g[0].row.length;
+
+  let neighbors = [];
+  let validNeighbors = [];
+  neighbors.push([y, x - 1]);
+  neighbors.push([y, x + 1]);
+  neighbors.push([y - 1, x]);
+  neighbors.push([y + 1, x]);
+  neighbors.push([y - 1, x - 1]);
+  neighbors.push([y + 1, x - 1]);
+  neighbors.push([y - 1, x + 1]);
+  neighbors.push([y + 1, x + 1]);
+
+  neighbors.forEach((neighbors) => {
+    if (
+      neighbors[0] >= 0 &&
+      neighbors[0] < gridHeight &&
+      neighbors[1] >= 0 &&
+      neighbors[1] < gridWidth
+    ) {
+      if (grid.g[neighbors[0]].row[neighbors[1]].letter == "") {
+        validNeighbors.push(neighbors);
+      }
+    }
+  });
+  return validNeighbors;
+}
+
+let puzzleWords = ["PICKLE", "BANANA", "CAKE", "YUMMY"];
+let puzzle_grid = grid();
+puzzle_grid.makeGrid();
 
 console.log(GridCanvas(puzzleWords));
+console.log(emptyNeighbors(0, 0, puzzle_grid));
+console.log(emptyNeighbors(4, 3, puzzle_grid));
+console.log(allotSpace(puzzleWords));
