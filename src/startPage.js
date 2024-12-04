@@ -4,10 +4,10 @@ let speed = 30; // Default speed for color change
 
 function setup() {
   let canvas = createCanvas(windowWidth, windowHeight); // Create a full-window canvas
-  canvas.style('position', 'absolute'); // Ensure the canvas stays behind other elements
-  canvas.style('top', '0');
-  canvas.style('left', '0');
-  canvas.style('z-index', '0'); // Place the canvas below the buttons
+  canvas.style("position", "absolute"); // Ensure the canvas stays behind other elements
+  canvas.style("top", "0");
+  canvas.style("left", "0");
+  canvas.style("z-index", "0"); // Place the canvas below the buttons
 
   textSize(80); // Adjust the text size to fit the canvas
   textAlign(CENTER, CENTER);
@@ -78,7 +78,8 @@ function draw() {
   background(brightness); // Set the background based on brightness level
 
   // Create a fading effect with colors (blue, orange, white)
-  if (frameCount % speed === 0) { // Change color based on speed setting
+  if (frameCount % speed === 0) {
+    // Change color based on speed setting
     fill(lerpColor(color(0, 120, 255), color(255, 165, 0), random(0.0, 1.0)));
   }
 
@@ -101,7 +102,7 @@ function hideHelpModal() {
 
 function goToNextScreen() {
   // Code to transition to the next screen goes here
-  window.location.href = "../public/nextScreen.html"; // Adjust the path as needed
+  window.location.href = "../public/index.html"; // Adjust the path as needed
 }
 
 function showSettingsModal() {
@@ -115,5 +116,7 @@ function hideSettingsModal() {
 }
 
 function showCredits() {
-  alert("Game by [Enas Awad /n Kyle Furnish /n Austin Burden /n Erika Ferris ]"); // Placeholder for credits information
+  alert(
+    "Game by [Enas Awad /n Kyle Furnish /n Austin Burden /n Erika Ferris ]"
+  ); // Placeholder for credits information
 }
