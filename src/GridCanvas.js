@@ -1,3 +1,4 @@
+import fs from "fs";
 //import WordScheduling from "./WordScheduling.js";
 
 let gridCharacter = (x, y) => ({
@@ -37,8 +38,10 @@ let grid = () => ({
 // itself in and not able to place the rest of the words.
 export default function GridCanvas(puzzleWords) {
   let frontEndLetters = [];
+  let frontEndKey = [];
   for (let index = 0; index < 48; index++) {
     frontEndLetters.push("");
+    frontEndKey.push("");
   }
 
   puzzleWords.forEach((word) => {
@@ -48,6 +51,15 @@ export default function GridCanvas(puzzleWords) {
     let goodSpot = false;
     let xStart = 0;
     let yStart = 0;
+
+    // Copy the current state of the front-end letters array.
+    let newLetters = [];
+    let newKey = [];
+    for (let i = 0; i < 48; i++) {
+      newLetters.push(frontEndLetters[i]);
+      newKey.push(frontEndKey[i]);
+    }
+
     while (goodSpot == false) {
       xStart = Math.floor(Math.random() * gridWidth);
       yStart = Math.floor(Math.random() * gridHeight);
@@ -58,30 +70,32 @@ export default function GridCanvas(puzzleWords) {
         goodSpot = true;
         puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
         puzzle_grid.g[yStart].row[xStart].word = word;
-        let simpleI = 6 * (yStart + 1) + xStart;
-        frontEndLetters[simpleI] = wordChars[0];
+        let simpleI = 6 * yStart + xStart;
+        newLetters[simpleI] = wordChars[0];
+        newKey[simpleI] = word + " 0";
       } else {
         console.log("Unacceptable placement at: " + xStart + "," + yStart);
       }
     }
 
-    // Check the legal moves from the current position.
-    let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
-
     // Iterate through the next letters, placing each in a legal position.
     for (let i = 1; i < wordLength; i++) {
+      // Check the legal moves from the current position.
+      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
       // Randomly choose a legal move.
       let goodMove = false;
       // Remove potential moves as we test them. If we can't find a move, we'll have to backtrack.
+
       while (goodMove == false && legalMoves.length > 0) {
         let randomMovePick = Math.floor(Math.random() * legalMoves.length);
         let move = legalMoves[randomMovePick];
-        // Remove that move from legalMoves.
+        // Remove the move we're testing from legalMoves.
         legalMoves.splice(randomMovePick, 1);
 
         let yTest = move[0];
         let xTest = move[1];
 
+        // Need to ignore the condition of leaving empty neighbors for the last letter.
         if (
           i == wordLength - 1 ||
           emptyNeighbors(yTest, xTest, puzzle_grid).length > 0
@@ -92,13 +106,30 @@ export default function GridCanvas(puzzleWords) {
           puzzle_grid.g[yStart].row[xStart].word = word;
           goodMove = true;
           // Find the basic (front-end) index of this bubble position.
-          let simpleI = 6 * (yStart + 1) + xStart;
-          frontEndLetters[simpleI] = wordChars[i];
+          let simpleI = 6 * yStart + xStart;
+          newLetters[simpleI] = wordChars[i];
+          newKey[simpleI] = word + " " + i;
+          // If this is the last letter, append " end" to the key.
+          if (i == wordLength - 1) {
+            newKey[simpleI] += " end";
+          }
         }
       }
+      // If we get to here and skipped a letter, need to restart from the beginning of the word.
+      if (goodMove == false) {
+        newLetters = frontEndLetters.slice();
+        newKey = frontEndKey.slice();
+        puzzleWords.push(word);
+        break;
+      }
+    }
+    // Update the front-end letters array with the new word.
+    for (let i = 0; i < 48; i++) {
+      frontEndLetters[i] = newLetters[i];
+      frontEndKey[i] = newKey[i];
     }
   });
-  return frontEndLetters;
+  return [frontEndLetters, frontEndKey];
 }
 // Determine how many bubbles each puzzle word will use.
 export function allotSpace(puzzleWords) {
@@ -141,19 +172,34 @@ function emptyNeighbors(y, x, grid) {
 }
 
 let puzzleWords = [
-  "energy",
-  "electric",
-  "folk",
-  "community",
-  "dispute",
-  "controversy",
-  "argument",
-  "human",
+  "species",
+  "water",
+  "animal",
+  "cancer",
+  "aquarium",
+  "horse",
+  "dog",
+  "libra",
+  "zoo",
 ];
 let puzzle_grid = grid();
 puzzle_grid.makeGrid();
 
-console.log(GridCanvas(puzzleWords));
-console.log(emptyNeighbors(0, 0, puzzle_grid));
-console.log(emptyNeighbors(4, 3, puzzle_grid));
-console.log(allotSpace(puzzleWords));
+let puzzle = GridCanvas(puzzleWords);
+let puzzleLetters = puzzle[0];
+let puzzleKey = puzzle[1];
+console.log(puzzleLetters);
+
+// print the last generated puzzleWords to a file named "lastPuzzle.txt"
+// Get current working directory.
+let cwd = process.cwd();
+console.log(cwd);
+fs.writeFileSync(
+  cwd + "/puzzle_resources/lastPuzzle.txt",
+  puzzleLetters.toString()
+);
+
+fs.writeFileSync(
+  cwd + "/puzzle_resources/lastPuzzleKey.txt",
+  puzzleKey.toString()
+);

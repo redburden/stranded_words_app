@@ -5,6 +5,13 @@ let currentClicked = null;
 let previousClicked = null;
 let bubbleNum = null;
 let clickedValues = [];
+let letters = [];
+let keys = [];
+
+function preload() {
+  letters = loadStrings("../puzzle_resources/lastPuzzle.txt");
+  keys = loadStrings("../puzzle_resources/lastPuzzleKey.txt");
+}
 
 function setup() {
   // Create the canvas and set background
@@ -40,8 +47,10 @@ function mouseClicked() {
   if (bubbleNum < bubbles.length) {
     // Check if the index is valid
     if (bubbles[bubbleNum] == lastClickedBubble) {
+      // Here we need to handle cases where we check for a valid word. As in: the user selected a list of bubbles that form a word.
+
       lastClickedBubble.fillColor = [255]; // Reset color of the previously clicked bubble
-      lastClickedBubble.display(); // Display it again
+      lastClickedBubble.display(); // Refresh display.
     }
 
     if (
@@ -55,28 +64,28 @@ function mouseClicked() {
       lastClickedBubble = bubbles[bubbleNum]; // Store the last
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
-      showCurrentBubble();
     } else if (clickedValues.length < 2) {
       lastClickedBubble = bubbles[bubbleNum]; // Store the last
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
-      showCurrentBubble();
     } else {
       clickedValues = [];
-      clearBubbleFormatting();
+      //clearBubbleFormatting();
     }
   }
 
   // TODO: This method should only apply to the word in progress.
-  function clearBubbleFormatting() {
+  function clearBubbleFormatting(word) {
     for (let i = 0; i < bubbles.length; i++) {
-      bubbles[i].fillColor = [255];
-      bubbles[i].display();
+      let bubbleKey = keys[i].split(" ")[0];
+      if (bubbleKey == word) {
+        bubbles[i].fillColor = [255];
+        bubbles[i].display();
+      }
     }
   }
 
   function showCurrentBubble() {
-    //background(200);
     currentBubble = bubbleNum;
     text(currentBubble, 100, 100);
   }
@@ -99,59 +108,9 @@ function randChars() {
 // TODO: This should get the grid from GridCanvas.js and display it on the front-end.
 
 function populateGrid() {
-  //let letters = randChars();
-  let letters = [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    "l",
-    "e",
-    0,
-    0,
-    "p",
-    "l",
-    "e",
-    "p",
-    0,
-    "o",
-    "i",
-    "o",
-    "s",
-    "c",
-    0,
-    "t",
-    "r",
-    "e",
-    "o",
-    "r",
-    "r",
-    "l",
-    "p",
-    "e",
-    0,
-    "f",
-    "n",
-    "u",
-    "e",
-    0,
-    0,
-    "i",
-    "g",
-    "p",
-    "d",
-    "s",
-    0,
-    "m",
-    "a",
-    "h",
-    "i",
-    "h",
-    "b",
-    "i",
-  ];
+  // Get letter array from ../puzzle_resources/lastPuzzle.txt
+  letters = letters[0].split(",");
+  console.log(letters);
   textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
     size: 50,

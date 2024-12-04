@@ -256,5 +256,13 @@ function main() {
 //main(main);
 
 (async () => {
-  console.log(WordScheduling(await WordAssociation("solar")));
+  let wordList = await WordAssociation("fish");
+  wordList = WordScheduling(wordList);
+  console.log(wordList);
+  // Print the number of characters found in all of the words.
+  let totalChars = 0;
+  wordList.forEach((word) => {
+    totalChars += word.length;
+  });
+  console.log("Total Characters: ", totalChars);
 })();
