@@ -14,6 +14,7 @@ function preload() {
     keys = loadStrings("../resources/lastPuzzleKey.txt");
   } catch (e) {
     console.log(e);
+    preload();
   }
 }
 
