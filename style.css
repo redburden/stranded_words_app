@@ -1,0 +1,108 @@
+/* Base styling for full viewport coverage */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Prevent scrolling */
+  background-color: #121212; /* Set a dark background to complement the page style */
+}
+
+/* Container for buttons to position them correctly on top of the canvas */
+#button-container {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center container horizontally and vertically */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Reduced spacing between buttons */
+  z-index: 1; /* Higher value to keep buttons on top of the canvas */
+  border: 2px solid #ff8c00; /* Orange border around button container for better visibility */
+  padding: 15px;
+  border-radius: 15px; /* Rounded corners for the container */
+  background: rgba(30, 30, 30, 0.8); /* Dark, muted background */
+  transition: background 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* When the user hovers over the button container */
+#button-container:hover {
+  background: rgba(255, 255, 255, 0.1); /* Lighter background to highlight interaction */
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.6); /* Orange glow when hovered over */
+}
+
+/* Start button styling - more compact */
+#start-button {
+  background: #001f3f; /* Dark navy color */
+  color: white;
+  border: 2px solid #ff8c00; /* Orange border for contrast */
+  padding: 10px 30px; /* Reduced padding */
+  font-size: 20px; /* Smaller font size */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Adding a box shadow for depth */
+}
+
+#start-button:hover {
+  background: #ff8c00; /* Dark orange color on hover */
+  transform: scale(1.05); /* Slightly increase size on hover */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4); /* Darker and larger shadow on hover */
+}
+
+/* Help, Settings, and Credits button styling - more compact */
+#help-button, #settings-button, #credits-button {
+  background: #001f3f; /* Dark navy color */
+  color: white;
+  border: 2px solid #ff8c00; /* Orange border for contrast */
+  padding: 8px 25px; /* Reduced padding */
+  font-size: 16px; /* Smaller font size */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Adding a box shadow for depth */
+}
+
+#help-button:hover, #settings-button:hover, #credits-button:hover {
+  background: #ff8c00; /* Dark orange color on hover */
+  transform: scale(1.05);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Styling */
+.modal {
+  display: none;
+  background: rgba(0, 0, 0, 0.8); /* Semi-transparent background for contrast */
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998; /* Higher z-index to ensure it stays on top */
+  display: flex; /* Center modal content */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal Content Styling */
+.modal-content {
+  background-color: #ffffff; /* White background for content */
+  color: black;
+  border: 2px solid #001f3f; /* Dark navy border for emphasis */
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  max-width: 90%;
+  text-align: left;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 9999; /* Ensure it stays on top of everything */
+  animation: fadeIn 0.3s ease; /* Add fade-in animation */
+}
+
+/* Adjust the canvas to cover the full page */
+canvas {
+  z-index: 0; /* Lower value to place it behind the buttons and modal */
+  position: absolute; /* Ensure it's positioned properly in the background */
+  top: 0;
+  left: 0;
+}
