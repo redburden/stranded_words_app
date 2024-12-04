@@ -9,8 +9,14 @@ let letters = [];
 let keys = [];
 
 function preload() {
-  letters = loadStrings("../puzzleresources/lastPuzzle.txt");
-  keys = loadStrings("../puzzleresources/lastPuzzleKey.txt");
+  while (letters.length == 0) {
+    try {
+      letters = loadStrings("../puzzleresources/lastPuzzle.txt");
+      keys = loadStrings("../puzzleresources/lastPuzzleKey.txt");
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 function setup() {
