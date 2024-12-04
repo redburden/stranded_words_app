@@ -195,11 +195,11 @@ console.log(puzzleLetters);
 let cwd = process.cwd();
 console.log(cwd);
 fs.writeFileSync(
-  cwd + "/puzzle_resources/lastPuzzle.txt",
+  cwd + "/puzzleresources/lastPuzzle.txt",
   puzzleLetters.toString()
 );
 
 fs.writeFileSync(
-  cwd + "/puzzle_resources/lastPuzzleKey.txt",
+  cwd + "/puzzleresources/lastPuzzleKey.txt",
   puzzleKey.toString()
 );
