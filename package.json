@@ -5,7 +5,7 @@
   },
   "type": "module",
   "version": "1.0.0",
-  "main": "./public/index.html",
+  "main": "index.html",
   "scripts": {},
   "author": "",
   "description": "",
