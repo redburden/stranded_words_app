@@ -9,13 +9,11 @@ let letters = [];
 let keys = [];
 
 function preload() {
-  while (letters.length == 0) {
-    try {
-      letters = loadStrings("../puzzleresources/lastPuzzle.txt");
-      keys = loadStrings("../puzzleresources/lastPuzzleKey.txt");
-    } catch (e) {
-      console.log(e);
-    }
+  try {
+    letters = loadStrings("../resources/lastPuzzle.txt");
+    keys = loadStrings("../resources/lastPuzzleKey.txt");
+  } catch (e) {
+    console.log(e);
   }
 }
 

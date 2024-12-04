@@ -194,12 +194,6 @@ console.log(puzzleLetters);
 // Get current working directory.
 let cwd = process.cwd();
 console.log(cwd);
-fs.writeFileSync(
-  cwd + "/puzzleresources/lastPuzzle.txt",
-  puzzleLetters.toString()
-);
+fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
 
-fs.writeFileSync(
-  cwd + "/puzzleresources/lastPuzzleKey.txt",
-  puzzleKey.toString()
-);
+fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
