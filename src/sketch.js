@@ -41,6 +41,9 @@ function mouseClicked() {
   // Get mouseX and mouseY, round them to the nearest 50
   let x = mouseX;
   let y = mouseY;
+  if (x < 10 || x > 590 || y < 10 || y > 790) {
+    return;
+  }
   let xRound = Math.round(x / 50) * 50;
   let yRound = Math.round(y / 50) * 50;
 
@@ -123,6 +126,13 @@ function mouseClicked() {
           });
           clickedValues = [];
         }
+      } else {
+        console.log("Invalid bubble picked at index: " + bubbleNum);
+        // Clear formatting for each clicked bubble.
+        clickedValues.forEach((clicked) => {
+          clearBubbleFormattingByIndex(clicked);
+        });
+        clickedValues = [];
       }
     } else if (clickedValues.length < 2) {
       console.log("First bubble clicked");
@@ -201,7 +211,7 @@ function populateGrid() {
     disconnect() {
       stroke([200]);
       fill([200]);
-      strokeWeight(6);
+      strokeWeight(8);
       this.line = line(this.xpos, this.ypos, this.xConnect, this.yConnect);
       this.xConnect = this.xpos;
       this.yConnect = this.ypos;
