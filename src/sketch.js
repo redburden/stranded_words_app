@@ -19,6 +19,8 @@ function preload() {
 }
 
 function setup() {
+  // Create a form to submit the word
+
   // Create the canvas and set background
   let grid_container = createDiv();
   grid_container.addClass("grid-container");
@@ -47,7 +49,8 @@ function mouseClicked() {
   yRound = Math.floor(yRound / 100);
 
   bubbleNum = yRound * 6 + xRound;
-  handleClick();
+  clickedValues.push(bubbleNum);
+  console.log("Bubble clicked: " + bubbleNum);
 
   if (bubbleNum < bubbles.length) {
     // Check if the index is valid
@@ -59,76 +62,73 @@ function mouseClicked() {
     }
 
     let cvLength = clickedValues.length;
-    if (
-      //what if we used mouse clicks to make sure they were in the bubble like on the start page I used a pointer outside the  Strands Logo
-      //then when I was touching the button with the mouse I changed the mouse to a hand....
-      (clickedValues.length == 2 &&
-        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 6) ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 6 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 1 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 1 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 7 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 7 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 5 ||
-      clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 5
-    ) {
-      lastClickedBubble = bubbles[bubbleNum]; // Store the last
-      lastClickedBubble.update(); // Update to change its color
-      console.log("Drawing line from " + clickedValues[cvLength - 2]);
-      drawLine(
-        clickedValues[cvLength - 2],
-        bubbles[bubbleNum].xpos,
-        bubbles[bubbleNum].ypos
-      ); // Connect the last bubble to the current one
-      lastClickedBubble.display(); // Display the updated bubble
-    } else if (clickedValues.length < 2) {
-      lastClickedBubble = bubbles[bubbleNum]; // Store the last
-      lastClickedBubble.update(); // Update to change its color
-      lastClickedBubble.display(); // Display the updated bubble
-    } else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
-      // Test to see if the word was completed.
-      let prevClicked = keys[clickedValues[0]].split(" ");
-      let letterNum = Number(prevClicked[1]);
-      if (letterNum == 0) {
-        for (let i = 1; i < clickedValues.length; ) {
-          if (
-            keys[clickedValues[i]].split(" ")[2] &&
-            keys[clickedValues[i]].split(" ")[2] == "end"
-          ) {
-            console.log("Valid word.");
-            // Call the function to format the word blue. Add this to the list of words found.
-            colorWordBlue(prevClicked[0]);
-            clickedValues = [];
-            break;
-          } else {
-            i++;
+    if (cvLength > 1) {
+      // Check if the clicked bubble is adjacent to the last clicked bubble
+      if (
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 6 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 6 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 1 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 1 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 7 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 7 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] - 5 ||
+        clickedValues[cvLength - 2] == clickedValues[cvLength - 1] + 5
+      ) {
+        lastClickedBubble = bubbles[bubbleNum]; // Store the last
+        lastClickedBubble.update(); // Update to change its color
+        console.log("New highlight: " + lastClickedBubble.letter);
+
+        drawLine(
+          clickedValues[cvLength - 2],
+          bubbles[bubbleNum].xpos,
+          bubbles[bubbleNum].ypos
+        ); // Connect the last bubble to the current one
+        lastClickedBubble.display(); // Display the updated bubble
+      } else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
+        console.log("Same bubble clicked twice");
+        // Test to see if the word was completed.
+        let prevClicked = keys[clickedValues[0]].split(" ");
+        let letterNum = Number(prevClicked[1]);
+        if (letterNum == 0) {
+          for (let i = 1; i < clickedValues.length; ) {
+            if (
+              keys[clickedValues[i]].split(" ")[2] &&
+              keys[clickedValues[i]].split(" ")[2] == "end"
+            ) {
+              // Call the function to format the word blue. Add this to the list of words found.
+              colorWordBlue(prevClicked[0]);
+              clickedValues = [];
+              break;
+            } else {
+              i++;
+            }
+            if (
+              keys[clickedValues[i]].split(" ")[1] - 1 !=
+                keys[clickedValues[i - 1]].split(" ")[1] ||
+              keys[clickedValues[i]].split(" ")[0] !=
+                keys[clickedValues[i - 1]].split(" ")[0]
+            ) {
+              clickedValues.forEach((clicked) => {
+                clearBubbleFormattingByIndex(clicked);
+              });
+              clickedValues = [];
+              break;
+            }
           }
-          if (
-            keys[clickedValues[i]].split(" ")[1] - 1 !=
-              keys[clickedValues[i - 1]].split(" ")[1] ||
-            keys[clickedValues[i]].split(" ")[0] !=
-              keys[clickedValues[i - 1]].split(" ")[0]
-          ) {
-            console.log(
-              "Not a valid word." +
-                keys[clickedValues[i]] +
-                " " +
-                keys[clickedValues[i - 1]]
-            );
-            clickedValues.forEach((clicked) => {
-              clearBubbleFormattingByIndex(clicked);
-            });
-            clickedValues = [];
-            break;
-          }
+        } else {
+          console.log("Invalid bubble picked at index: " + bubbleNum);
+          // Clear formatting for each clicked bubble.
+          clickedValues.forEach((clicked) => {
+            clearBubbleFormattingByIndex(clicked);
+          });
+          clickedValues = [];
         }
-      } else {
-        // Clear formatting for each clicked bubble.
-        clickedValues.forEach((clicked) => {
-          clearBubbleFormattingByIndex(clicked);
-        });
-        clickedValues = [];
       }
+    } else if (clickedValues.length < 2) {
+      console.log("First bubble clicked");
+      lastClickedBubble = bubbles[bubbleNum]; // Store the last
+      lastClickedBubble.update(); // Update to change its color
+      lastClickedBubble.display(); // Display the updated bubble
     }
   }
 
@@ -139,8 +139,7 @@ function mouseClicked() {
 
   function clearBubbleFormattingByIndex(index) {
     bubbles[index].fillColor = [255];
-    bubbles[index].xConnect = bubbles[index].xpos;
-    bubbles[index].yConnect = bubbles[index].ypos;
+    bubbles[index].disconnect();
     bubbles[index].display();
   }
 
@@ -159,28 +158,13 @@ function mouseClicked() {
     text(currentBubble, 100, 100);
   }
 }
-
-function randChars() {
-  // Generate an array of 48 random chars
-  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let chars = [];
-
-  for (let i = 0; i < 48; i++) {
-    chars.push(
-      characters.charAt(Math.floor(Math.random() * characters.length))
-    );
-  }
-
-  return chars;
-}
-
 // Retrieve the grid greated by GridCanvas.js and display it.
 
 function populateGrid() {
   // Get letter array from ../puzzle_resources/lastPuzzle.txt
   letters = letters[0].split(",");
   keys = keys[0].split(",");
-  console.log(letters);
+
   textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
     size: 50,
@@ -190,16 +174,21 @@ function populateGrid() {
     letter: letter.toUpperCase(),
     xConnect: xPos,
     yConnect: yPos,
+    line: null,
+    lineColor: [0],
     display() {
       if (this.letter != "") {
+        stroke([0]);
         fill(this.fillColor);
         strokeWeight(2);
         ellipse(this.xpos, this.ypos, this.size, this.size);
         fill(0);
         text(this.letter, this.xpos, this.ypos);
+        stroke(this.lineColor);
         strokeWeight(5);
+
         if (this.xConnect != this.xpos || this.yConnect != this.ypos)
-          line(this.xpos, this.ypos, this.xConnect, this.yConnect);
+          this.line = line(this.xpos, this.ypos, this.xConnect, this.yConnect);
       }
     },
     update() {
@@ -208,6 +197,14 @@ function populateGrid() {
     connect(x, y) {
       this.xConnect = x;
       this.yConnect = y;
+    },
+    disconnect() {
+      stroke([200]);
+      fill([200]);
+      strokeWeight(6);
+      this.line = line(this.xpos, this.ypos, this.xConnect, this.yConnect);
+      this.xConnect = this.xpos;
+      this.yConnect = this.ypos;
     },
   });
 
@@ -222,16 +219,4 @@ function populateGrid() {
   }
   // Unsure for now if this needs to return the array.
   return bubbles;
-}
-
-function handleClick(value) {
-  value = bubbleNum;
-  clickedValues.push(value);
-  console.log(clickedValues);
-
-  /*
-  if (clickedValues.length > 2) {
-    clickedValues.shift();
-  }
-    */
 }
