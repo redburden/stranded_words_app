@@ -101,9 +101,13 @@ export default function WordScheduling(weightedWords) {
           // When we get here it means the last word we tried to add made us "bust" the 48 character limit.
           // Try and replace a word that was already added with this one.
           for (let j = selectedWords.length - 1; j >= 1; j--) {
-            if (totalChars + word[0].length - selectedWords[j].length == 48) {
+            if (
+              selectedWords[j].length < word[0].length &&
+              totalChars - selectedWords[j].length + word[0].length == 48
+            ) {
+              totalChars -= selectedWords[j].length;
+              totalChars += word[0].length;
               selectedWords[j] = word[0];
-              totalChars += word[0].length - selectedWords[j].length;
               totalWeight += word[1];
               break;
             }
@@ -257,11 +261,11 @@ function main() {
 
 (async () => {
   let wordList = await WordAssociation("fish");
-  wordList = WordScheduling(wordList);
-  console.log(wordList);
+  let scheduledWords = WordScheduling(wordList);
+  console.log("scheduled words:" + scheduledWords);
   // Print the number of characters found in all of the words.
   let totalChars = 0;
-  wordList.forEach((word) => {
+  scheduledWords.forEach((word) => {
     totalChars += word.length;
   });
   console.log("Total Characters: ", totalChars);
