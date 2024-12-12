@@ -1,11 +1,12 @@
 {
   "dependencies": {
+    "browserify": "^17.0.1",
     "mocha": "^10.7.3",
     "random-words": "^2.0.1"
   },
-  "type": "module",
+  "type": "commonjs",
   "version": "1.0.0",
-  "main": "index.html",
+  "private": true,
   "scripts": {},
   "author": "",
   "description": "",

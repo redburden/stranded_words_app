@@ -44,6 +44,11 @@ export default function GridCanvas(puzzleWords) {
     frontEndKey.push("");
   }
 
+  // Sort the puzzleWords array by length descending.
+  puzzleWords.sort((a, b) => b.length - a.length);
+  let wordsCopy = puzzleWords.slice();
+  let errorCount = 0;
+
   puzzleWords.forEach((word) => {
     let wordChars = word.split("");
     let wordLength = wordChars.length;

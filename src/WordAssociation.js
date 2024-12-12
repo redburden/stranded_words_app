@@ -12,7 +12,7 @@
     Add a timer to detect when we've been looping too long. Invalidate the keyword in that case.
   */
 
-export default async function WordAssociation(keyword) {
+async function WordAssociation(keyword) {
   async function APIRequest(keyword) {
     let url =
       "https://twinword-word-graph-dictionary.p.rapidapi.com/association/?entry=";
@@ -65,3 +65,5 @@ export default async function WordAssociation(keyword) {
   console.log(wordList.toString());
 })();
 */
+
+module.exports = { WordAssociation: WordAssociation };

@@ -19,22 +19,46 @@ function preload() {
 }
 
 function setup() {
-  // Create a form to submit the word
+  // Create a form to submit the puzzle keyword.
+  let form = createDiv();
+  form.addClass("form");
+  let input = createInput();
+  input.parent(form);
+  input.addClass("input");
+  input.id("keyword");
+  input.attribute("placeholder", "Enter the keyword");
+  let button = createButton();
+  button.parent(form);
+  button.addClass("button");
+  button.id("submit");
+  button.mousePressed(() => {
+    // Run the WordScheduling.js script with the keyword.
+    // Then run preload to get the new data.
+    let keyword = input.value();
+    let script = document.createElement("script");
+    // Set the script type to text/javascript.
+    script.type = "text/javascript";
+    script.src = `src/WordScheduling.js?keyword=${keyword}`;
+    document.body.appendChild(script);
+    preload();
 
-  // Create the canvas and set background
-  let grid_container = createDiv();
-  grid_container.addClass("grid-container");
-  let canvas = createCanvas(600, 800);
-  canvas.parent(grid_container);
-  background(200);
-  textAlign(CENTER, CENTER);
-  background(200);
-  populateGrid();
-  textSize(32);
+    // Create the canvas and set background
+    let grid_container = createDiv();
+    grid_container.addClass("grid-container");
+    grid_container.position(0, 40);
+    let canvas = createCanvas(600, 800);
+    canvas.parent(grid_container);
+    background(200);
+    textAlign(CENTER, CENTER);
+    background(200);
+    populateGrid();
+    textSize(32);
+  });
 }
 
 function draw() {
-  noLoop();
+  // If a new word is inputted into the form, run WordScheduling.js with that keyword.
+  // Then load the puzzle with the new data.
 }
 
 function mouseClicked() {
@@ -53,7 +77,6 @@ function mouseClicked() {
 
   bubbleNum = yRound * 6 + xRound;
   clickedValues.push(bubbleNum);
-  console.log("Bubble clicked: " + bubbleNum);
 
   if (bubbleNum < bubbles.length) {
     // Check if the index is valid
@@ -79,7 +102,6 @@ function mouseClicked() {
       ) {
         lastClickedBubble = bubbles[bubbleNum]; // Store the last
         lastClickedBubble.update(); // Update to change its color
-        console.log("New highlight: " + lastClickedBubble.letter);
 
         drawLine(
           clickedValues[cvLength - 2],
@@ -88,7 +110,6 @@ function mouseClicked() {
         ); // Connect the last bubble to the current one
         lastClickedBubble.display(); // Display the updated bubble
       } else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
-        console.log("Same bubble clicked twice");
         // Test to see if the word was completed.
         let prevClicked = keys[clickedValues[0]].split(" ");
         let letterNum = Number(prevClicked[1]);
@@ -135,7 +156,6 @@ function mouseClicked() {
         clickedValues = [];
       }
     } else if (clickedValues.length < 2) {
-      console.log("First bubble clicked");
       lastClickedBubble = bubbles[bubbleNum]; // Store the last
       lastClickedBubble.update(); // Update to change its color
       lastClickedBubble.display(); // Display the updated bubble
@@ -162,11 +182,6 @@ function mouseClicked() {
       }
     }
   }
-
-  function showCurrentBubble() {
-    currentBubble = bubbleNum;
-    text(currentBubble, 100, 100);
-  }
 }
 // Retrieve the grid greated by GridCanvas.js and display it.
 
@@ -181,9 +196,11 @@ function populateGrid() {
     xpos: xPos,
     ypos: yPos,
     fillColor: [255],
-    letter: letter.toUpperCase(),
+    letter: letter ? letter.toUpperCase() : "",
     xConnect: xPos,
     yConnect: yPos,
+    tanX: 0,
+    tanY: 0,
     line: null,
     lineColor: [0],
     display() {
@@ -197,8 +214,12 @@ function populateGrid() {
         stroke(this.lineColor);
         strokeWeight(5);
 
-        if (this.xConnect != this.xpos || this.yConnect != this.ypos)
-          this.line = line(this.xpos, this.ypos, this.xConnect, this.yConnect);
+        if (this.xConnect != this.xpos || this.yConnect != this.ypos) {
+          console.log(this.letter);
+          // Adjust the x and y coordinates of the line to intersect at the tangent point.
+          this.adjustedHypotenuse();
+          this.line = line(this.tanX, this.tanY, this.xConnect, this.yConnect);
+        }
       }
     },
     update() {
@@ -215,6 +236,19 @@ function populateGrid() {
       this.line = line(this.xpos, this.ypos, this.xConnect, this.yConnect);
       this.xConnect = this.xpos;
       this.yConnect = this.ypos;
+    },
+    adjustedHypotenuse() {
+      let x = this.xConnect - this.xpos;
+      let y = this.yConnect - this.ypos;
+      let hyp = Math.sqrt(x * x + y * y);
+      let adjHyp = hyp - 50;
+      let scale = adjHyp / hyp;
+      let adjX = x - x * scale;
+      let adjY = y - y * scale;
+      this.tanX = this.xpos + adjX / 2;
+      this.tanY = this.ypos + adjY / 2;
+      this.xConnect = this.xConnect - adjX / 2;
+      this.yConnect = this.yConnect - adjY / 2;
     },
   });
 
