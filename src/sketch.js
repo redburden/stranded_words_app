@@ -14,51 +14,41 @@ function preload() {
     keys = loadStrings("../resources/lastPuzzleKey.txt");
   } catch (e) {
     console.log(e);
-    preload();
+    setTimeout(preload(), 1000);
   }
 }
 
 function setup() {
-  // Create a form to submit the puzzle keyword.
-  let form = createDiv();
-  form.addClass("form");
-  let input = createInput();
-  input.parent(form);
-  input.addClass("input");
-  input.id("keyword");
-  input.attribute("placeholder", "Enter the keyword");
-  let button = createButton();
-  button.parent(form);
-  button.addClass("button");
-  button.id("submit");
-  button.mousePressed(() => {
-    // Run the WordScheduling.js script with the keyword.
-    // Then run preload to get the new data.
-    let keyword = input.value();
-    let script = document.createElement("script");
-    // Set the script type to text/javascript.
-    script.type = "text/javascript";
-    script.src = `src/WordScheduling.js?keyword=${keyword}`;
-    document.body.appendChild(script);
-    preload();
-
-    // Create the canvas and set background
-    let grid_container = createDiv();
-    grid_container.addClass("grid-container");
-    grid_container.position(0, 40);
-    let canvas = createCanvas(600, 800);
-    canvas.parent(grid_container);
-    background(200);
-    textAlign(CENTER, CENTER);
-    background(200);
-    populateGrid();
-    textSize(32);
+  let input = document.getElementById("keyword");
+  input.placeholder = "Enter a keyword";
+  let button = document.getElementById("submit");
+  button.addEventListener("click", () => {
+    // Delay 2 seconds then generate the grid.
+    setTimeout(() => {
+      try {
+        letters = loadStrings("../resources/lastPuzzle.txt");
+        keys = loadStrings("../resources/lastPuzzleKey.txt");
+      } catch (e) {
+        console.log(e);
+        setTimeout(preload(), 1000);
+      }
+      // Create the canvas and set background
+      let grid_container = createDiv();
+      grid_container.addClass("grid-container");
+      grid_container.position(0, 40);
+      let canvas = createCanvas(600, 800);
+      canvas.parent(grid_container);
+      background(200);
+      textAlign(CENTER, CENTER);
+      background(200);
+      populateGrid();
+      textSize(32);
+    }, 2000);
   });
 }
 
 function draw() {
-  // If a new word is inputted into the form, run WordScheduling.js with that keyword.
-  // Then load the puzzle with the new data.
+  noLoop();
 }
 
 function mouseClicked() {

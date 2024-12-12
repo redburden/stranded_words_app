@@ -1,76 +1,427 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-/*
-  The function, APIRequest will be given a keyword. The function
-  uses that keyword to query the twinword API for associated words.
-*/
-
-/*
-    The WordAssociation default function will obtain a keyword from front-end user input.
-    It will use that keyword to come up with 20 associated words.
-  */
-
-/*
-    Add a timer to detect when we've been looping too long. Invalidate the keyword in that case.
-  */
-
-async function WordAssociation(keyword) {
-  async function APIRequest(keyword) {
-    let url =
-      "https://twinword-word-graph-dictionary.p.rapidapi.com/association/?entry=";
-    url += keyword;
-    const options = {
-      method: "GET",
-      headers: {
-        "x-rapidapi-key": "a5e3266b15msh8ef5c4e2b5b25b1p1fe1e1jsn8157911ee17f",
-        "x-rapidapi-host": "twinword-word-graph-dictionary.p.rapidapi.com",
-      },
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      let wordList = JSON.parse(result).assoc_word_ex;
-      return wordList;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  let assocWords = [];
-  let APIwords = await APIRequest(keyword);
-
-  while (assocWords.length < 20) {
-    APIwords.forEach((word) => {
-      if (assocWords.includes(word) == false) {
-        assocWords.push(word);
-      }
-    });
-
-    let newKeyword = assocWords[Math.ceil(Math.random() * assocWords.length)];
-
-    APIwords = await APIRequest(newKeyword);
-  }
-
-  let wordCount = 0;
-  assocWords.forEach((word) => {
-    assocWords[wordCount] = [word, 20 - wordCount];
-    wordCount++;
-  });
-
-  return assocWords;
-}
-
-/*
-(async () => {
-  let wordList = await WordAssociation("frog");
-  console.log(wordList.toString());
-})();
-*/
-
-module.exports = { WordAssociation: WordAssociation };
 
 },{}],2:[function(require,module,exports){
-const WordAssociation = require("./WordAssociation");
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],3:[function(require,module,exports){
+(function (process){(function (){
+const fs = require("fs");
+
+let gridCharacter = (x, y) => ({
+  xpos: x,
+  ypos: y,
+  letter: "",
+  word: "",
+  top: null,
+  left: null,
+  right: null,
+  bottom: null,
+});
+
+let gridWidth = 6;
+let gridHeight = 8;
+let gridRow = (rowNum) => ({
+  row: [],
+  makeRow() {
+    for (let i = 0; i < gridWidth; i++) {
+      this.row.push(gridCharacter(i, rowNum));
+    }
+  },
+});
+
+let grid = () => ({
+  g: [],
+  makeGrid() {
+    for (let i = 0; i < gridHeight; i++) {
+      let r = gridRow(i);
+      r.makeRow();
+      this.g.push(r);
+    }
+  },
+});
+
+// DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
+// itself in and not able to place the rest of the words.
+function GridCanvas(puzzleWords) {
+  let puzzle_grid = grid();
+  puzzle_grid.makeGrid();
+  let frontEndLetters = [];
+  let frontEndKey = [];
+  for (let index = 0; index < 48; index++) {
+    frontEndLetters.push("");
+    frontEndKey.push("");
+  }
+
+  // Sort the puzzleWords array by length descending.
+  puzzleWords.sort((a, b) => b.length - a.length);
+  let wordsCopy = puzzleWords.slice();
+  let errorCount = 0;
+
+  puzzleWords.forEach((word) => {
+    let wordChars = word.split("");
+    let wordLength = wordChars.length;
+    // Pick a random point on the grid to start the word.
+    let goodSpot = false;
+    let xStart = 0;
+    let yStart = 0;
+
+    // Copy the current state of the front-end letters array.
+    let newLetters = [];
+    let newKey = [];
+    for (let i = 0; i < 48; i++) {
+      newLetters.push(frontEndLetters[i]);
+      newKey.push(frontEndKey[i]);
+    }
+
+    while (goodSpot == false) {
+      xStart = Math.floor(Math.random() * gridWidth);
+      yStart = Math.floor(Math.random() * gridHeight);
+      if (
+        puzzle_grid.g[yStart].row[xStart].letter == "" &&
+        emptyNeighbors(yStart, xStart, puzzle_grid).length > 0
+      ) {
+        goodSpot = true;
+        puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
+        puzzle_grid.g[yStart].row[xStart].word = word;
+        let simpleI = 6 * yStart + xStart;
+        newLetters[simpleI] = wordChars[0];
+        newKey[simpleI] = word + " 0";
+      } else {
+        console.log("Unacceptable placement at: " + xStart + "," + yStart);
+      }
+    }
+
+    // Iterate through the next letters, placing each in a legal position.
+    for (let i = 1; i < wordLength; i++) {
+      // Check the legal moves from the current position.
+      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
+      // Randomly choose a legal move.
+      let goodMove = false;
+      // Remove potential moves as we test them. If we can't find a move, we'll have to backtrack.
+
+      while (goodMove == false && legalMoves.length > 0) {
+        let randomMovePick = Math.floor(Math.random() * legalMoves.length);
+        let move = legalMoves[randomMovePick];
+        // Remove the move we're testing from legalMoves.
+        legalMoves.splice(randomMovePick, 1);
+
+        let yTest = move[0];
+        let xTest = move[1];
+
+        // Need to ignore the condition of leaving empty neighbors for the last letter.
+        if (
+          i == wordLength - 1 ||
+          emptyNeighbors(yTest, xTest, puzzle_grid).length > 0
+        ) {
+          yStart = yTest;
+          xStart = xTest;
+          puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
+          puzzle_grid.g[yStart].row[xStart].word = word;
+          goodMove = true;
+          // Find the basic (front-end) index of this bubble position.
+          let simpleI = 6 * yStart + xStart;
+          newLetters[simpleI] = wordChars[i];
+          newKey[simpleI] = word + " " + i;
+          // If this is the last letter, append " end" to the key.
+          if (i == wordLength - 1) {
+            newKey[simpleI] += " end";
+          }
+        }
+      }
+      // If we get to here and skipped a letter, need to restart from the beginning of the word.
+      if (goodMove == false) {
+        newLetters = frontEndLetters.slice();
+        newKey = frontEndKey.slice();
+        puzzleWords.push(word);
+        break;
+      }
+    }
+    // Update the front-end letters array with the new word.
+    for (let i = 0; i < 48; i++) {
+      frontEndLetters[i] = newLetters[i];
+      frontEndKey[i] = newKey[i];
+    }
+  });
+  return [frontEndLetters, frontEndKey];
+}
+// Determine how many bubbles each puzzle word will use.
+function allotSpace(puzzleWords) {
+  let wordSizes = [];
+  puzzleWords.forEach((word) => {
+    wordSizes.push(word.split("").length);
+  });
+
+  return wordSizes;
+}
+
+function emptyNeighbors(y, x, grid) {
+  let gridHeight = grid.g.length;
+  let gridWidth = grid.g[0].row.length;
+
+  let neighbors = [];
+  let validNeighbors = [];
+  neighbors.push([y, x - 1]);
+  neighbors.push([y, x + 1]);
+  neighbors.push([y - 1, x]);
+  neighbors.push([y + 1, x]);
+  neighbors.push([y - 1, x - 1]);
+  neighbors.push([y + 1, x - 1]);
+  neighbors.push([y - 1, x + 1]);
+  neighbors.push([y + 1, x + 1]);
+
+  neighbors.forEach((neighbors) => {
+    if (
+      neighbors[0] >= 0 &&
+      neighbors[0] < gridHeight &&
+      neighbors[1] >= 0 &&
+      neighbors[1] < gridWidth
+    ) {
+      if (grid.g[neighbors[0]].row[neighbors[1]].letter == "") {
+        validNeighbors.push(neighbors);
+      }
+    }
+  });
+  return validNeighbors;
+}
+
+function WritePuzzleToFile(puzzleWords) {
+  let puzzle = GridCanvas(puzzleWords);
+  let puzzleLetters = puzzle[0];
+  let puzzleKey = puzzle[1];
+  //console.log(puzzleLetters);
+
+  // print the last generated puzzleWords to a file named "lastPuzzle.txt"
+  // Get current working directory.
+  let cwd = process.cwd();
+  console.log(cwd);
+  fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
+
+  fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
+}
+
+module.exports = WritePuzzleToFile;
+
+}).call(this)}).call(this,require('_process'))
+},{"_process":2,"fs":1}],4:[function(require,module,exports){
+// Require jsdom
+// const jsdom = require("jsdom");
+
+async function RelatedWords(keyword) {
+  const pageLink =
+    "https://pacific-fjord-98167-21542ad415f7.herokuapp.com/https://relatedwords.io/" +
+    keyword;
+  let words = [];
+  try {
+    const response = await fetch(pageLink);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const body = await response.text();
+    //const pageDOM = new jsdom.JSDOM(body);
+    const parser = new DOMParser();
+    const pageDOM = parser.parseFromString(body, "text/html");
+    let wordDivs = pageDOM.querySelectorAll(".word-ctn");
+
+    wordDivs.forEach((div) => {
+      words.push([div.querySelector("a").textContent, words.length + 1]);
+    });
+    console.log(words.length);
+  } catch (error) {
+    console.error(error.message);
+  }
+  return words;
+}
+
+module.exports = RelatedWords;
+
+},{}],5:[function(require,module,exports){
+const RelatedWords = require("./RelatedWords.js");
+const WritePuzzleToFile = require("./GridCanvas.js");
+//const WordAssociation = require("./WordAssociation.js");
 
 let wordForm = document.getElementById("keyword");
 let submitButton = document.getElementById("submit");
@@ -79,9 +430,21 @@ let submitButton = document.getElementById("submit");
 submitButton.addEventListener("click", (event) => {
   event.preventDefault();
   let keyword = wordForm.value;
-  WordAssociation(keyword).then((weightedWords) => {
+  RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
     console.log("Scheduled Words: ", scheduledWords);
+    WritePuzzleToFile(scheduledWords);
+
+    // If there is already a <script> with sketch.js, remove it.
+    // Add a new <script> with the new sketch.js file.
+    let script = document.querySelector(".sketch");
+    if (script) {
+      script.remove();
+    }
+    let newScript = document.createElement("script");
+    newScript.className = "sketch";
+    newScript.setAttribute("src", "src/sketch.js");
+    document.body.appendChild(newScript);
   });
 });
 
@@ -297,9 +660,9 @@ function main() {
 */
 // Call main to run the tests
 //main(main);
-
+/*
 (async () => {
-  let wordList = await WordAssociation("fish");
+  let wordList = await RelatedWords("fish");
   let scheduledWords = WordScheduling(wordList);
   console.log("scheduled words:" + scheduledWords);
   // Print the number of characters found in all of the words.
@@ -309,5 +672,6 @@ function main() {
   });
   console.log("Total Characters: ", totalChars);
 })();
+*/
 
-},{"./WordAssociation":1}]},{},[2]);
+},{"./GridCanvas.js":3,"./RelatedWords.js":4}]},{},[5]);

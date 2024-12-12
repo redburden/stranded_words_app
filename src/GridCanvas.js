@@ -1,5 +1,4 @@
-import fs from "fs";
-//import WordScheduling from "./WordScheduling.js";
+const fs = require("fs");
 
 let gridCharacter = (x, y) => ({
   xpos: x,
@@ -36,7 +35,9 @@ let grid = () => ({
 
 // DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
 // itself in and not able to place the rest of the words.
-export default function GridCanvas(puzzleWords) {
+function GridCanvas(puzzleWords) {
+  let puzzle_grid = grid();
+  puzzle_grid.makeGrid();
   let frontEndLetters = [];
   let frontEndKey = [];
   for (let index = 0; index < 48; index++) {
@@ -137,7 +138,7 @@ export default function GridCanvas(puzzleWords) {
   return [frontEndLetters, frontEndKey];
 }
 // Determine how many bubbles each puzzle word will use.
-export function allotSpace(puzzleWords) {
+function allotSpace(puzzleWords) {
   let wordSizes = [];
   puzzleWords.forEach((word) => {
     wordSizes.push(word.split("").length);
@@ -176,29 +177,19 @@ function emptyNeighbors(y, x, grid) {
   return validNeighbors;
 }
 
-let puzzleWords = [
-  "species",
-  "water",
-  "animal",
-  "cancer",
-  "aquarium",
-  "horse",
-  "dog",
-  "libra",
-  "zoo",
-];
-let puzzle_grid = grid();
-puzzle_grid.makeGrid();
+function WritePuzzleToFile(puzzleWords) {
+  let puzzle = GridCanvas(puzzleWords);
+  let puzzleLetters = puzzle[0];
+  let puzzleKey = puzzle[1];
+  //console.log(puzzleLetters);
 
-let puzzle = GridCanvas(puzzleWords);
-let puzzleLetters = puzzle[0];
-let puzzleKey = puzzle[1];
-console.log(puzzleLetters);
+  // print the last generated puzzleWords to a file named "lastPuzzle.txt"
+  // Get current working directory.
+  let cwd = process.cwd();
+  console.log(cwd);
+  fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
 
-// print the last generated puzzleWords to a file named "lastPuzzle.txt"
-// Get current working directory.
-let cwd = process.cwd();
-console.log(cwd);
-fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
+  fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
+}
 
-fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
+module.exports = WritePuzzleToFile;

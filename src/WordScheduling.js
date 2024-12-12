@@ -1,10 +1,6 @@
-const WordAssociation = require("./WordAssociation");
-
-// While no keyword is found, keep searching for a keyword.
-while (keyword === "") {
-  keyword = WordAssociation(keyword);
-  console.log(document.getChildNodes());
-}
+const RelatedWords = require("./RelatedWords.js");
+const WritePuzzleToFile = require("./GridCanvas.js");
+//const WordAssociation = require("./WordAssociation.js");
 
 let wordForm = document.getElementById("keyword");
 let submitButton = document.getElementById("submit");
@@ -13,9 +9,21 @@ let submitButton = document.getElementById("submit");
 submitButton.addEventListener("click", (event) => {
   event.preventDefault();
   let keyword = wordForm.value;
-  WordAssociation(keyword).then((weightedWords) => {
+  RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
     console.log("Scheduled Words: ", scheduledWords);
+    WritePuzzleToFile(scheduledWords);
+
+    // If there is already a <script> with sketch.js, remove it.
+    // Add a new <script> with the new sketch.js file.
+    let script = document.querySelector(".sketch");
+    if (script) {
+      script.remove();
+    }
+    let newScript = document.createElement("script");
+    newScript.className = "sketch";
+    newScript.setAttribute("src", "src/sketch.js");
+    document.body.appendChild(newScript);
   });
 });
 
@@ -231,9 +239,9 @@ function main() {
 */
 // Call main to run the tests
 //main(main);
-
+/*
 (async () => {
-  let wordList = await WordAssociation("fish");
+  let wordList = await RelatedWords("fish");
   let scheduledWords = WordScheduling(wordList);
   console.log("scheduled words:" + scheduledWords);
   // Print the number of characters found in all of the words.
@@ -243,3 +251,4 @@ function main() {
   });
   console.log("Total Characters: ", totalChars);
 })();
+*/

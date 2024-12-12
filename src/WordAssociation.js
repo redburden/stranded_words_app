@@ -59,11 +59,11 @@ async function WordAssociation(keyword) {
   return assocWords;
 }
 
+module.exports = WordAssociation;
+
 /*
 (async () => {
   let wordList = await WordAssociation("frog");
   console.log(wordList.toString());
 })();
 */
-
-module.exports = { WordAssociation: WordAssociation };
