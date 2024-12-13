@@ -6,6 +6,7 @@ let previousClicked = null;
 let bubbleNum = null;
 let clickedValues = [];
 let letters = [];
+let initLetters = [];
 let keys = [];
 
 function getLetters() {
@@ -13,6 +14,7 @@ function getLetters() {
     // Get the letters and keys from their respective <p> elements.
     letters = document.getElementById("letters").innerText.split(",");
     keys = document.getElementById("keys").innerText.split(",");
+    console.log(document.getElementById("keys").innerText);
   } catch (e) {
     console.log(e);
   }
@@ -22,25 +24,32 @@ function setup() {
   let input = document.getElementById("keyword");
   input.placeholder = "Enter a keyword";
   let button = document.getElementById("submit");
-  button.addEventListener("click", () => {
-    while (letters.length == 0) {
-      getLetters();
-    }
-    // Create the canvas and set background
-    let grid_container = createDiv();
-    grid_container.addClass("grid-container");
-    grid_container.position(0, 40);
-    let canvas = createCanvas(600, 800);
-    canvas.parent(grid_container);
-    background(200);
-    textAlign(CENTER, CENTER);
-    background(200);
-    populateGrid();
-    textSize(32);
-  });
+
+  getLetters();
+  initLetters = letters;
+  let grid_container = createDiv();
+  grid_container.addClass("grid-container");
+  grid_container.position(0, 40);
+  let canvas = createCanvas(600, 800);
+  canvas.parent(grid_container);
+  background(200);
+  textAlign(CENTER, CENTER);
 }
 
 function draw() {
+  setInterval(() => {
+    getLetters();
+    if (letters[0] != initLetters[0]) {
+      // Create the canvas and set background
+      console.log("Letters have changed");
+      console.log(letters);
+      console.log(keys);
+      background(200);
+      populateGrid();
+      textSize(32);
+      initLetters = letters.slice();
+    }
+  }, 1000);
   noLoop();
 }
 
@@ -170,8 +179,8 @@ function mouseClicked() {
 
 function populateGrid() {
   // Get letter array from ../puzzle_resources/lastPuzzle.txt
-  letters = letters[0].split(",");
-  keys = keys[0].split(",");
+  //letters = letters[0].split(",");
+  //keys = keys[0].split(",");
 
   textSize(32);
   let newCircle = (letter, xPos, yPos) => ({
@@ -244,6 +253,4 @@ function populateGrid() {
       i++;
     }
   }
-  // Unsure for now if this needs to return the array.
-  return bubbles;
 }

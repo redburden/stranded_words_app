@@ -437,17 +437,14 @@ submitButton.addEventListener("click", (event) => {
     console.log("Letters: ", letters);
     let keys = lettersAndKeys[1];
     // Write the letters and keys to a hidden <p> element.
-    let lettersElement = document.createElement("p");
-    lettersElement.id = "letters";
-    lettersElement.textContent = letters.join("");
-    lettersElement.style.display = "none";
+    let lettersElement = document.getElementById("letters");
+    lettersElement.textContent = letters.join();
     document.body.appendChild(lettersElement);
-    let keysElement = document.createElement("p");
-    keysElement.id = "keys";
-    keysElement.textContent = keys.join("");
-    keysElement.style.display = "none";
+    let keysElement = document.getElementById("keys");
+    keysElement.textContent = keys.join();
     document.body.appendChild(keysElement);
 
+    /*
     // If there is already a <script> with sketch.js, remove it.
     // Add a new <script> with the new sketch.js file.
     let script = document.querySelector(".sketch");
@@ -458,6 +455,7 @@ submitButton.addEventListener("click", (event) => {
     newScript.className = "sketch";
     newScript.setAttribute("src", "src/sketch.js");
     document.body.appendChild(newScript);
+    */
   });
 });
 
