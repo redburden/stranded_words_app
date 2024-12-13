@@ -117,6 +117,6 @@ function hideSettingsModal() {
 
 function showCredits() {
   alert(
-    "Game by [Enas Awad \n Kyle Furnish \n Austin Burden \n Erika Ferris ]"
+    "Game by: \n Enas Awad \n Kyle Furnish \n Austin Burden \n Erika Ferris"
   ); // Placeholder for credits information
 }
