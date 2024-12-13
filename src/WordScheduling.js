@@ -11,6 +11,7 @@ submitButton.addEventListener("click", (event) => {
   let keyword = wordForm.value;
   RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
+    console.log("Scheduled Words: ", scheduledWords);
     let lettersAndKeys = GridCanvas(scheduledWords);
     console.log("Scheduled Words: ", scheduledWords);
     let letters = lettersAndKeys[0];
@@ -55,29 +56,34 @@ function WordScheduling(weightedWords) {
 
     // Stop conditions are when we've reached 48 characters or there are no more words to consider.
     while (weightedWords.length > 0 && totalChars < 48) {
+      /*
       // Starting here means we need to reset the selectedWords array.
       // It starts with the keyword only.
       selectedWords = [keyword];
       totalChars = keyword.length;
       totalWeight = weightedWords[0][1];
 
-      /*
+      
         Pop off the highest weighted word.
         We do this because on the first run that word is the keyword which we are guaranteed to use, 
         OR:We tried all combinations that use the highest weighted word and it didn't work. So get rid of
         that word and try again.
-    */
+    
       weightedWords.reverse();
       weightedWords.pop();
       weightedWords.reverse();
 
+      */
       // Iterate through the remaining words to find the best combination.
+      weightedWords = weightedWords.reverse();
       while (weightedWords.length > 0) {
         let word = weightedWords.pop();
         if (
           totalChars + word[0].length <= 48 &&
           !selectedWords.includes(word[0])
         ) {
+          console.log("Word: ", word[0]);
+          console.log("Selected Words: ", selectedWords);
           selectedWords.push(word[0]);
           totalChars += word[0].length;
           totalWeight += word[1];
@@ -90,11 +96,14 @@ function WordScheduling(weightedWords) {
               totalChars + word[0].length - selectedWords[j].length == 48 &&
               !selectedWords.includes(word[0])
             ) {
+              console.log("Word: ", word[0]);
+
               totalChars -= selectedWords[j].length;
               totalChars += word[0].length;
               selectedWords[j] = word[0];
               totalWeight += word[1];
-              //break;
+              console.log("Selected Words: ", selectedWords);
+              return selectedWords;
             }
           }
         }
@@ -114,7 +123,6 @@ function WordScheduling(weightedWords) {
     return error.message; // Optionally return error message
   }
 }
-module.exports = WordScheduling;
 /*
 let testCase1 = sampleWords;
 console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.

@@ -82,6 +82,13 @@ function GridCanvas(puzzleWords) {
       } else {
         console.log("Unacceptable placement at: " + xStart + "," + yStart);
         errorCount++;
+        if (errorCount > 100) {
+          console.log("Too many errors, breaking.");
+          errorCount = 0;
+          frontEndLetters = [];
+          frontEndKey = [];
+          puzzleWords = wordsCopy.slice();
+        }
       }
     }
 
@@ -128,6 +135,7 @@ function GridCanvas(puzzleWords) {
         errorCount++;
         if (errorCount > 100) {
           console.log("Too many errors, breaking.");
+          errorCount = 0;
           frontEndLetters = [];
           frontEndKey = [];
           puzzleWords = wordsCopy.slice();
