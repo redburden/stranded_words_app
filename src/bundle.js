@@ -4340,7 +4340,10 @@ async function RelatedWords(keyword) {
     let wordDivs = pageDOM.querySelectorAll(".word-ctn");
 
     wordDivs.forEach((div) => {
-      words.push([div.querySelector("a").textContent, words.length + 1]);
+      words.push([
+        div.querySelector("a").textContent,
+        wordDivs.length - words.length,
+      ]);
     });
     console.log(words.length);
   } catch (error) {
