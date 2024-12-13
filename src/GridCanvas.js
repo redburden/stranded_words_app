@@ -1,5 +1,3 @@
-const fs = require("fs");
-
 let gridCharacter = (x, y) => ({
   xpos: x,
   ypos: y,
@@ -178,6 +176,7 @@ function emptyNeighbors(y, x, grid) {
 }
 
 function WritePuzzleToFile(puzzleWords) {
+  const fs = require("fs");
   let puzzle = GridCanvas(puzzleWords);
   let puzzleLetters = puzzle[0];
   let puzzleKey = puzzle[1];
@@ -192,4 +191,4 @@ function WritePuzzleToFile(puzzleWords) {
   fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
 }
 
-module.exports = WritePuzzleToFile;
+module.exports = GridCanvas;

@@ -188,8 +188,6 @@ process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
 (function (process){(function (){
-const fs = require("fs");
-
 let gridCharacter = (x, y) => ({
   xpos: x,
   ypos: y,
@@ -368,6 +366,7 @@ function emptyNeighbors(y, x, grid) {
 }
 
 function WritePuzzleToFile(puzzleWords) {
+  const fs = require("fs");
   let puzzle = GridCanvas(puzzleWords);
   let puzzleLetters = puzzle[0];
   let puzzleKey = puzzle[1];
@@ -382,7 +381,7 @@ function WritePuzzleToFile(puzzleWords) {
   fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
 }
 
-module.exports = WritePuzzleToFile;
+module.exports = GridCanvas;
 
 }).call(this)}).call(this,require('_process'))
 },{"_process":2,"fs":1}],4:[function(require,module,exports){
@@ -420,7 +419,7 @@ module.exports = RelatedWords;
 
 },{}],5:[function(require,module,exports){
 const RelatedWords = require("./RelatedWords.js");
-const WritePuzzleToFile = require("./GridCanvas.js");
+const GridCanvas = require("./GridCanvas.js");
 //const WordAssociation = require("./WordAssociation.js");
 
 let wordForm = document.getElementById("keyword");
@@ -432,8 +431,22 @@ submitButton.addEventListener("click", (event) => {
   let keyword = wordForm.value;
   RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
+    let lettersAndKeys = GridCanvas(scheduledWords);
     console.log("Scheduled Words: ", scheduledWords);
-    WritePuzzleToFile(scheduledWords);
+    let letters = lettersAndKeys[0];
+    console.log("Letters: ", letters);
+    let keys = lettersAndKeys[1];
+    // Write the letters and keys to a hidden <p> element.
+    let lettersElement = document.createElement("p");
+    lettersElement.id = "letters";
+    lettersElement.textContent = letters.join("");
+    lettersElement.style.display = "none";
+    document.body.appendChild(lettersElement);
+    let keysElement = document.createElement("p");
+    keysElement.id = "keys";
+    keysElement.textContent = keys.join("");
+    keysElement.style.display = "none";
+    document.body.appendChild(keysElement);
 
     // If there is already a <script> with sketch.js, remove it.
     // Add a new <script> with the new sketch.js file.

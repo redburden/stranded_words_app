@@ -8,13 +8,13 @@ let clickedValues = [];
 let letters = [];
 let keys = [];
 
-function preload() {
+function getLetters() {
   try {
-    letters = loadStrings("../resources/lastPuzzle.txt");
-    keys = loadStrings("../resources/lastPuzzleKey.txt");
+    // Get the letters and keys from their respective <p> elements.
+    letters = document.getElementById("letters").innerText.split(",");
+    keys = document.getElementById("keys").innerText.split(",");
   } catch (e) {
     console.log(e);
-    setTimeout(preload(), 1000);
   }
 }
 
@@ -23,27 +23,20 @@ function setup() {
   input.placeholder = "Enter a keyword";
   let button = document.getElementById("submit");
   button.addEventListener("click", () => {
-    // Delay 2 seconds then generate the grid.
-    setTimeout(() => {
-      try {
-        letters = loadStrings("../resources/lastPuzzle.txt");
-        keys = loadStrings("../resources/lastPuzzleKey.txt");
-      } catch (e) {
-        console.log(e);
-        setTimeout(preload(), 1000);
-      }
-      // Create the canvas and set background
-      let grid_container = createDiv();
-      grid_container.addClass("grid-container");
-      grid_container.position(0, 40);
-      let canvas = createCanvas(600, 800);
-      canvas.parent(grid_container);
-      background(200);
-      textAlign(CENTER, CENTER);
-      background(200);
-      populateGrid();
-      textSize(32);
-    }, 2000);
+    while (letters.length == 0) {
+      getLetters();
+    }
+    // Create the canvas and set background
+    let grid_container = createDiv();
+    grid_container.addClass("grid-container");
+    grid_container.position(0, 40);
+    let canvas = createCanvas(600, 800);
+    canvas.parent(grid_container);
+    background(200);
+    textAlign(CENTER, CENTER);
+    background(200);
+    populateGrid();
+    textSize(32);
   });
 }
 

@@ -1,5 +1,5 @@
 const RelatedWords = require("./RelatedWords.js");
-const WritePuzzleToFile = require("./GridCanvas.js");
+const GridCanvas = require("./GridCanvas.js");
 //const WordAssociation = require("./WordAssociation.js");
 
 let wordForm = document.getElementById("keyword");
@@ -11,8 +11,22 @@ submitButton.addEventListener("click", (event) => {
   let keyword = wordForm.value;
   RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
+    let lettersAndKeys = GridCanvas(scheduledWords);
     console.log("Scheduled Words: ", scheduledWords);
-    WritePuzzleToFile(scheduledWords);
+    let letters = lettersAndKeys[0];
+    console.log("Letters: ", letters);
+    let keys = lettersAndKeys[1];
+    // Write the letters and keys to a hidden <p> element.
+    let lettersElement = document.createElement("p");
+    lettersElement.id = "letters";
+    lettersElement.textContent = letters.join("");
+    lettersElement.style.display = "none";
+    document.body.appendChild(lettersElement);
+    let keysElement = document.createElement("p");
+    keysElement.id = "keys";
+    keysElement.textContent = keys.join("");
+    keysElement.style.display = "none";
+    document.body.appendChild(keysElement);
 
     // If there is already a <script> with sketch.js, remove it.
     // Add a new <script> with the new sketch.js file.
