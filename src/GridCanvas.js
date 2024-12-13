@@ -1,5 +1,3 @@
-const { error } = require("console");
-
 let gridCharacter = (x, y) => ({
   xpos: x,
   ypos: y,
@@ -33,8 +31,6 @@ let grid = () => ({
   },
 });
 
-// DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
-// itself in and not able to place the rest of the words.
 function GridCanvas(puzzleWords) {
   let puzzle_grid = grid();
   puzzle_grid.makeGrid();
@@ -50,7 +46,8 @@ function GridCanvas(puzzleWords) {
   let wordsCopy = puzzleWords.slice();
   let errorCount = 0;
 
-  puzzleWords.forEach((word) => {
+  while (puzzleWords.length > 0) {
+    let word = puzzleWords.pop();
     let wordChars = word.split("");
     let wordLength = wordChars.length;
     // Pick a random point on the grid to start the word.
@@ -152,10 +149,11 @@ function GridCanvas(puzzleWords) {
       frontEndLetters[i] = newLetters[i];
       frontEndKey[i] = newKey[i];
     }
-  });
+  }
   return [frontEndLetters, frontEndKey];
 }
 // Determine how many bubbles each puzzle word will use.
+// This was an attempt to fill the grid but has wound up being scrap code.
 function allotSpace(puzzleWords) {
   let wordSizes = [];
   puzzleWords.forEach((word) => {
@@ -195,6 +193,7 @@ function emptyNeighbors(y, x, grid) {
   return validNeighbors;
 }
 
+// This function is not used in the web version of the game. It was used in testing on Node.js.
 function WritePuzzleToFile(puzzleWords) {
   const fs = require("fs");
   let puzzle = GridCanvas(puzzleWords);
