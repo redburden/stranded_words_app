@@ -1,3 +1,5 @@
+const { error } = require("console");
+
 let gridCharacter = (x, y) => ({
   xpos: x,
   ypos: y,
@@ -79,6 +81,7 @@ function GridCanvas(puzzleWords) {
         newKey[simpleI] = word + " 0";
       } else {
         console.log("Unacceptable placement at: " + xStart + "," + yStart);
+        errorCount++;
       }
     }
 
@@ -121,9 +124,18 @@ function GridCanvas(puzzleWords) {
       }
       // If we get to here and skipped a letter, need to restart from the beginning of the word.
       if (goodMove == false) {
-        newLetters = frontEndLetters.slice();
-        newKey = frontEndKey.slice();
-        puzzleWords.push(word);
+        // Another impossible placement has occurred. Keep an error count to avoid constantly looping.
+        errorCount++;
+        if (errorCount > 100) {
+          console.log("Too many errors, breaking.");
+          frontEndLetters = [];
+          frontEndKey = [];
+          puzzleWords = wordsCopy.slice();
+        } else {
+          newLetters = frontEndLetters.slice();
+          newKey = frontEndKey.slice();
+          puzzleWords.push(word);
+        }
         break;
       }
     }

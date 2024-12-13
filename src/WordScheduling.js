@@ -23,19 +23,6 @@ submitButton.addEventListener("click", (event) => {
     let keysElement = document.getElementById("keys");
     keysElement.textContent = keys.join();
     document.body.appendChild(keysElement);
-
-    /*
-    // If there is already a <script> with sketch.js, remove it.
-    // Add a new <script> with the new sketch.js file.
-    let script = document.querySelector(".sketch");
-    if (script) {
-      script.remove();
-    }
-    let newScript = document.createElement("script");
-    newScript.className = "sketch";
-    newScript.setAttribute("src", "src/sketch.js");
-    document.body.appendChild(newScript);
-    */
   });
 });
 
@@ -85,8 +72,12 @@ function WordScheduling(weightedWords) {
       weightedWords.reverse();
 
       // Iterate through the remaining words to find the best combination.
-      weightedWords.forEach((word) => {
-        if (totalChars + word[0].length <= 48) {
+      while (weightedWords.length > 0) {
+        let word = weightedWords.pop();
+        if (
+          totalChars + word[0].length <= 48 &&
+          !selectedWords.includes(word[0])
+        ) {
           selectedWords.push(word[0]);
           totalChars += word[0].length;
           totalWeight += word[1];
@@ -96,17 +87,18 @@ function WordScheduling(weightedWords) {
           for (let j = selectedWords.length - 1; j >= 1; j--) {
             if (
               selectedWords[j].length < word[0].length &&
-              totalChars - selectedWords[j].length + word[0].length == 48
+              totalChars + word[0].length - selectedWords[j].length == 48 &&
+              !selectedWords.includes(word[0])
             ) {
               totalChars -= selectedWords[j].length;
               totalChars += word[0].length;
               selectedWords[j] = word[0];
               totalWeight += word[1];
-              break;
+              //break;
             }
           }
         }
-      });
+      }
     }
 
     // When this line is reached, totalChars will either be 48 or only the weight of the keyword.
@@ -122,7 +114,7 @@ function WordScheduling(weightedWords) {
     return error.message; // Optionally return error message
   }
 }
-
+module.exports = WordScheduling;
 /*
 let testCase1 = sampleWords;
 console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
