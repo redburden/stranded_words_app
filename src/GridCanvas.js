@@ -1,3 +1,5 @@
+// Data structures used to make the grid.
+
 let gridCharacter = (x, y) => ({
   xpos: x,
   ypos: y,

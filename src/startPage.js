@@ -102,7 +102,7 @@ function hideHelpModal() {
 
 function goToNextScreen() {
   // Code to transition to the next screen goes here
-  window.location.href = "../public/index.html"; // Adjust the path as needed
+  window.location.href = "../index.html"; // Adjust the path as needed
 }
 
 function showSettingsModal() {
