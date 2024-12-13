@@ -39,7 +39,8 @@ function setup() {
 function draw() {
   setInterval(() => {
     getLetters();
-    if (letters[0] != initLetters[0]) {
+    if (letters.toString() != initLetters.toString()) {
+      bubbles = [];
       // Create the canvas and set background
       console.log("Letters have changed");
       console.log(letters);
