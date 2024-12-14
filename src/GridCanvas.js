@@ -77,7 +77,7 @@ function GridCanvas(puzzleWords) {
         puzzle_grid.g[yStart].row[xStart].word = word;
         let simpleI = 6 * yStart + xStart;
         newLetters[simpleI] = wordChars[0];
-        newKey[simpleI] = word + " 0";
+        newKey[simpleI] = word + ";0";
       } else {
         console.log("Unacceptable placement at: " + xStart + "," + yStart);
         errorCount++;
@@ -121,10 +121,10 @@ function GridCanvas(puzzleWords) {
           // Find the basic (front-end) index of this bubble position.
           let simpleI = 6 * yStart + xStart;
           newLetters[simpleI] = wordChars[i];
-          newKey[simpleI] = word + " " + i;
+          newKey[simpleI] = word + ";" + i;
           // If this is the last letter, append " end" to the key.
           if (i == wordLength - 1) {
-            newKey[simpleI] += " end";
+            newKey[simpleI] += ";end";
           }
         }
       }

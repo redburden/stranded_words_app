@@ -104,13 +104,13 @@ function mouseClicked() {
         lastClickedBubble.display(); // Display the updated bubble
       } else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
         // Test to see if the word was completed.
-        let prevClicked = keys[clickedValues[0]].split(" ");
+        let prevClicked = keys[clickedValues[0]].split(";");
         let letterNum = Number(prevClicked[1]);
         if (letterNum == 0) {
           for (let i = 1; i < clickedValues.length; ) {
             if (
-              keys[clickedValues[i]].split(" ")[2] &&
-              keys[clickedValues[i]].split(" ")[2] == "end"
+              keys[clickedValues[i]].split(";")[2] &&
+              keys[clickedValues[i]].split(";")[2] == "end"
             ) {
               // Call the function to format the word blue. Add this to the list of words found.
               colorWordBlue(prevClicked[0]);
@@ -120,10 +120,10 @@ function mouseClicked() {
               i++;
             }
             if (
-              keys[clickedValues[i]].split(" ")[1] - 1 !=
-                keys[clickedValues[i - 1]].split(" ")[1] ||
-              keys[clickedValues[i]].split(" ")[0] !=
-                keys[clickedValues[i - 1]].split(" ")[0]
+              keys[clickedValues[i]].split(";")[1] - 1 !=
+                keys[clickedValues[i - 1]].split(";")[1] ||
+              keys[clickedValues[i]].split(";")[0] !=
+                keys[clickedValues[i - 1]].split(";")[0]
             ) {
               clickedValues.forEach((clicked) => {
                 clearBubbleFormattingByIndex(clicked);
@@ -133,6 +133,8 @@ function mouseClicked() {
             }
           }
         } else {
+          console.log(prevClicked);
+          console.log("Letter number is not 0 " + letterNum);
           console.log("Invalid bubble picked at index: " + bubbleNum);
           // Clear formatting for each clicked bubble.
           clickedValues.forEach((clicked) => {
@@ -141,7 +143,7 @@ function mouseClicked() {
           clickedValues = [];
         }
       } else {
-        console.log("Invalid bubble picked at index: " + bubbleNum);
+        console.log("Non-neighboring bubble picked at index: " + bubbleNum);
         // Clear formatting for each clicked bubble.
         clickedValues.forEach((clicked) => {
           clearBubbleFormattingByIndex(clicked);
@@ -168,7 +170,7 @@ function mouseClicked() {
 
   function colorWordBlue(word) {
     for (let i = 0; i < bubbles.length; i++) {
-      let bubbleKey = keys[i].split(" ")[0];
+      let bubbleKey = keys[i].split(";")[0];
       if (bubbleKey == word) {
         bubbles[i].fillColor = [0, 0, 255];
         bubbles[i].display();
@@ -208,7 +210,7 @@ function populateGrid() {
         strokeWeight(5);
 
         if (this.xConnect != this.xpos || this.yConnect != this.ypos) {
-          console.log(this.letter);
+          //console.log(this.letter);
           // Adjust the x and y coordinates of the line to intersect at the tangent point.
           this.adjustedHypotenuse();
           this.line = line(this.tanX, this.tanY, this.xConnect, this.yConnect);
