@@ -11,11 +11,11 @@ submitButton.addEventListener("click", (event) => {
   let keyword = wordForm.value;
   RelatedWords(keyword).then((weightedWords) => {
     let scheduledWords = WordScheduling(weightedWords);
-    console.log("Scheduled Words: ", scheduledWords);
+    //console.log("Scheduled Words: ", scheduledWords);
     let lettersAndKeys = GridCanvas(scheduledWords);
-    console.log("Scheduled Words: ", scheduledWords);
+    //console.log("Scheduled Words: ", scheduledWords);
     let letters = lettersAndKeys[0];
-    console.log("Letters: ", letters);
+    //console.log("Letters: ", letters);
     let keys = lettersAndKeys[1];
     // Write the letters and keys to a hidden <p> element.
     let lettersElement = document.getElementById("letters");
@@ -96,13 +96,13 @@ function WordScheduling(weightedWords) {
               totalChars + word[0].length - selectedWords[j].length == 48 &&
               !selectedWords.includes(word[0])
             ) {
-              console.log("Word: ", word[0]);
+              //console.log("Word: ", word[0]);
 
               totalChars -= selectedWords[j].length;
               totalChars += word[0].length;
               selectedWords[j] = word[0];
               totalWeight += word[1];
-              console.log("Selected Words: ", selectedWords);
+              //console.log("Selected Words: ", selectedWords);
               return selectedWords;
             }
           }

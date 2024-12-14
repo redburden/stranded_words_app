@@ -14,7 +14,6 @@ function getLetters() {
     // Get the letters and keys from their respective <p> elements.
     letters = document.getElementById("letters").innerText.split(",");
     keys = document.getElementById("keys").innerText.split(",");
-    console.log(document.getElementById("keys").innerText);
   } catch (e) {
     console.log(e);
   }
@@ -102,8 +101,8 @@ function mouseClicked() {
           bubbles[bubbleNum].ypos
         ); // Connect the last bubble to the current one
         lastClickedBubble.display(); // Display the updated bubble
-      } else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
-        // Test to see if the word was completed.
+      } // If the same letter was pressed twice, test to see if the word was completed.
+      else if (clickedValues[cvLength - 2] == clickedValues[cvLength - 1]) {
         let prevClicked = keys[clickedValues[0]].split(" ");
         let letterNum = Number(prevClicked[1]);
         if (letterNum == 0) {
@@ -112,7 +111,7 @@ function mouseClicked() {
               keys[clickedValues[i]].split(" ")[2] &&
               keys[clickedValues[i]].split(" ")[2] == "end"
             ) {
-              // Call the function to format the word blue. Add this to the list of words found.
+              // Call the function to format the word blue.
               colorWordBlue(prevClicked[0]);
               clickedValues = [];
               break;
@@ -133,7 +132,9 @@ function mouseClicked() {
             }
           }
         } else {
-          console.log("Invalid bubble picked at index: " + bubbleNum);
+          console.log("Invalid word.");
+          console.log("Bubble letter: " + letters[bubbleNum]);
+          console.log("Bubble key: " + keys[bubbleNum]);
           // Clear formatting for each clicked bubble.
           clickedValues.forEach((clicked) => {
             clearBubbleFormattingByIndex(clicked);
@@ -141,7 +142,9 @@ function mouseClicked() {
           clickedValues = [];
         }
       } else {
-        console.log("Invalid bubble picked at index: " + bubbleNum);
+        console.log("Out of range bubble picked at index: " + bubbleNum);
+        console.log("Bubble letter: " + letters[bubbleNum]);
+        console.log("Bubble key: " + keys[bubbleNum]);
         // Clear formatting for each clicked bubble.
         clickedValues.forEach((clicked) => {
           clearBubbleFormattingByIndex(clicked);
@@ -179,11 +182,8 @@ function mouseClicked() {
 // Retrieve the grid greated by GridCanvas.js and display it.
 
 function populateGrid() {
-  // Get letter array from ../puzzle_resources/lastPuzzle.txt
-  //letters = letters[0].split(",");
-  //keys = keys[0].split(",");
-
   textSize(32);
+  // The newCircle object stores the properties of each bubble and displays it them on the canvas.
   let newCircle = (letter, xPos, yPos) => ({
     size: 50,
     xpos: xPos,
@@ -208,7 +208,7 @@ function populateGrid() {
         strokeWeight(5);
 
         if (this.xConnect != this.xpos || this.yConnect != this.ypos) {
-          console.log(this.letter);
+          //console.log(this.letter);
           // Adjust the x and y coordinates of the line to intersect at the tangent point.
           this.adjustedHypotenuse();
           this.line = line(this.tanX, this.tanY, this.xConnect, this.yConnect);

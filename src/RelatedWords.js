@@ -24,7 +24,7 @@ async function RelatedWords(keyword) {
         wordDivs.length - words.length,
       ]);
     });
-    console.log(words.length);
+    //console.log(words.length);
   } catch (error) {
     console.error(error.message);
   }
