@@ -79,7 +79,7 @@ function GridCanvas(puzzleWords) {
         newLetters[simpleI] = wordChars[0];
         newKey[simpleI] = word + " 0";
       } else {
-        //console.log("Unacceptable placement at: " + xStart + "," + yStart);
+        console.log("Unacceptable placement at: " + xStart + "," + yStart);
         errorCount++;
         if (errorCount > 100) {
           console.log("Too many errors, breaking.");
@@ -206,7 +206,7 @@ function WritePuzzleToFile(puzzleWords) {
   // print the last generated puzzleWords to a file named "lastPuzzle.txt"
   // Get current working directory.
   let cwd = process.cwd();
-  //console.log(cwd);
+  console.log(cwd);
   fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
 
   fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
