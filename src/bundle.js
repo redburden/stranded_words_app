@@ -1,6 +1,530 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function (process){(function (){
+const { error } = require("console");
 
-},{}],2:[function(require,module,exports){
+let gridCharacter = (x, y) => ({
+  xpos: x,
+  ypos: y,
+  letter: "",
+  word: "",
+  top: null,
+  left: null,
+  right: null,
+  bottom: null,
+});
+
+let gridWidth = 6;
+let gridHeight = 8;
+let gridRow = (rowNum) => ({
+  row: [],
+  makeRow() {
+    for (let i = 0; i < gridWidth; i++) {
+      this.row.push(gridCharacter(i, rowNum));
+    }
+  },
+});
+
+let grid = () => ({
+  g: [],
+  makeGrid() {
+    for (let i = 0; i < gridHeight; i++) {
+      let r = gridRow(i);
+      r.makeRow();
+      this.g.push(r);
+    }
+  },
+});
+
+// DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
+// itself in and not able to place the rest of the words.
+function GridCanvas(puzzleWords) {
+  let puzzle_grid = grid();
+  puzzle_grid.makeGrid();
+  let frontEndLetters = [];
+  let frontEndKey = [];
+  for (let index = 0; index < 48; index++) {
+    frontEndLetters.push("");
+    frontEndKey.push("");
+  }
+
+  // Sort the puzzleWords array by length descending.
+  puzzleWords.sort((a, b) => b.length - a.length);
+  let wordsCopy = puzzleWords.slice();
+  let errorCount = 0;
+
+  puzzleWords.forEach((word) => {
+    let wordChars = word.split("");
+    let wordLength = wordChars.length;
+    // Pick a random point on the grid to start the word.
+    let goodSpot = false;
+    let xStart = 0;
+    let yStart = 0;
+
+    // Copy the current state of the front-end letters array.
+    let newLetters = [];
+    let newKey = [];
+    for (let i = 0; i < 48; i++) {
+      newLetters.push(frontEndLetters[i]);
+      newKey.push(frontEndKey[i]);
+    }
+
+    while (goodSpot == false) {
+      xStart = Math.floor(Math.random() * gridWidth);
+      yStart = Math.floor(Math.random() * gridHeight);
+      if (
+        puzzle_grid.g[yStart].row[xStart].letter == "" &&
+        emptyNeighbors(yStart, xStart, puzzle_grid).length > 0
+      ) {
+        goodSpot = true;
+        puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
+        puzzle_grid.g[yStart].row[xStart].word = word;
+        let simpleI = 6 * yStart + xStart;
+        newLetters[simpleI] = wordChars[0];
+        newKey[simpleI] = word + ";0";
+      } else {
+        console.log("Unacceptable placement at: " + xStart + "," + yStart);
+        errorCount++;
+        if (errorCount > 100) {
+          console.log("Too many errors, breaking.");
+          errorCount = 0;
+          frontEndLetters = [];
+          frontEndKey = [];
+          puzzleWords = wordsCopy.slice();
+        }
+      }
+    }
+
+    // Iterate through the next letters, placing each in a legal position.
+    for (let i = 1; i < wordLength; i++) {
+      // Check the legal moves from the current position.
+      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
+      // Randomly choose a legal move.
+      let goodMove = false;
+      // Remove potential moves as we test them. If we can't find a move, we'll have to backtrack.
+
+      while (goodMove == false && legalMoves.length > 0) {
+        let randomMovePick = Math.floor(Math.random() * legalMoves.length);
+        let move = legalMoves[randomMovePick];
+        // Remove the move we're testing from legalMoves.
+        legalMoves.splice(randomMovePick, 1);
+
+        let yTest = move[0];
+        let xTest = move[1];
+
+        // Need to ignore the condition of leaving empty neighbors for the last letter.
+        if (
+          i == wordLength - 1 ||
+          emptyNeighbors(yTest, xTest, puzzle_grid).length > 0
+        ) {
+          yStart = yTest;
+          xStart = xTest;
+          puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
+          puzzle_grid.g[yStart].row[xStart].word = word;
+          goodMove = true;
+          // Find the basic (front-end) index of this bubble position.
+          let simpleI = 6 * yStart + xStart;
+          newLetters[simpleI] = wordChars[i];
+          newKey[simpleI] = word + ";" + i;
+          // If this is the last letter, append " end" to the key.
+          if (i == wordLength - 1) {
+            newKey[simpleI] += ";end";
+          }
+        }
+      }
+      // If we get to here and skipped a letter, need to restart from the beginning of the word.
+      if (goodMove == false) {
+        // Another impossible placement has occurred. Keep an error count to avoid constantly looping.
+        errorCount++;
+        if (errorCount > 100) {
+          console.log("Too many errors, breaking.");
+          errorCount = 0;
+          frontEndLetters = [];
+          frontEndKey = [];
+          puzzleWords = wordsCopy.slice();
+        } else {
+          newLetters = frontEndLetters.slice();
+          newKey = frontEndKey.slice();
+          puzzleWords.push(word);
+        }
+        break;
+      }
+    }
+    // Update the front-end letters array with the new word.
+    for (let i = 0; i < 48; i++) {
+      frontEndLetters[i] = newLetters[i];
+      frontEndKey[i] = newKey[i];
+    }
+  });
+  return [frontEndLetters, frontEndKey];
+}
+// Determine how many bubbles each puzzle word will use.
+function allotSpace(puzzleWords) {
+  let wordSizes = [];
+  puzzleWords.forEach((word) => {
+    wordSizes.push(word.split("").length);
+  });
+
+  return wordSizes;
+}
+
+function emptyNeighbors(y, x, grid) {
+  let gridHeight = grid.g.length;
+  let gridWidth = grid.g[0].row.length;
+
+  let neighbors = [];
+  let validNeighbors = [];
+  neighbors.push([y, x - 1]);
+  neighbors.push([y, x + 1]);
+  neighbors.push([y - 1, x]);
+  neighbors.push([y + 1, x]);
+  neighbors.push([y - 1, x - 1]);
+  neighbors.push([y + 1, x - 1]);
+  neighbors.push([y - 1, x + 1]);
+  neighbors.push([y + 1, x + 1]);
+
+  neighbors.forEach((neighbors) => {
+    if (
+      neighbors[0] >= 0 &&
+      neighbors[0] < gridHeight &&
+      neighbors[1] >= 0 &&
+      neighbors[1] < gridWidth
+    ) {
+      if (grid.g[neighbors[0]].row[neighbors[1]].letter == "") {
+        validNeighbors.push(neighbors);
+      }
+    }
+  });
+  return validNeighbors;
+}
+
+function WritePuzzleToFile(puzzleWords) {
+  const fs = require("fs");
+  let puzzle = GridCanvas(puzzleWords);
+  let puzzleLetters = puzzle[0];
+  let puzzleKey = puzzle[1];
+  //console.log(puzzleLetters);
+
+  // print the last generated puzzleWords to a file named "lastPuzzle.txt"
+  // Get current working directory.
+  let cwd = process.cwd();
+  console.log(cwd);
+  fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
+
+  fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
+}
+
+module.exports = GridCanvas;
+
+}).call(this)}).call(this,require('_process'))
+},{"_process":58,"console":19,"fs":4}],2:[function(require,module,exports){
+// Require jsdom
+// const jsdom = require("jsdom");
+
+async function RelatedWords(keyword) {
+  const pageLink =
+    "https://pacific-fjord-98167-21542ad415f7.herokuapp.com/https://relatedwords.io/" +
+    keyword;
+  let words = [];
+  try {
+    const response = await fetch(pageLink);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const body = await response.text();
+    //const pageDOM = new jsdom.JSDOM(body);
+    const parser = new DOMParser();
+    const pageDOM = parser.parseFromString(body, "text/html");
+    let wordDivs = pageDOM.querySelectorAll(".word-ctn");
+
+    wordDivs.forEach((div) => {
+      words.push([
+        div.querySelector("a").textContent,
+        wordDivs.length - words.length,
+      ]);
+    });
+    console.log(words.length);
+  } catch (error) {
+    console.error(error.message);
+  }
+  return words;
+}
+
+module.exports = RelatedWords;
+
+},{}],3:[function(require,module,exports){
+const RelatedWords = require("./RelatedWords.js");
+const GridCanvas = require("./GridCanvas.js");
+//const WordAssociation = require("./WordAssociation.js");
+
+let wordForm = document.getElementById("keyword");
+let submitButton = document.getElementById("submit");
+
+// Add an event listener to the form to run the WordScheduling function when the form is submitted.
+submitButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  let keyword = wordForm.value;
+  RelatedWords(keyword).then((weightedWords) => {
+    let scheduledWords = WordScheduling(weightedWords);
+    console.log("Scheduled Words: ", scheduledWords);
+    let lettersAndKeys = GridCanvas(scheduledWords);
+    console.log("Scheduled Words: ", scheduledWords);
+    let letters = lettersAndKeys[0];
+    console.log("Letters: ", letters);
+    let keys = lettersAndKeys[1];
+    // Write the letters and keys to a hidden <p> element.
+    let lettersElement = document.getElementById("letters");
+    lettersElement.textContent = letters.join();
+    document.body.appendChild(lettersElement);
+    let keysElement = document.getElementById("keys");
+    keysElement.textContent = keys.join();
+    document.body.appendChild(keysElement);
+  });
+});
+
+// Parameters: weightedWords - an array of words generated from WordAssociation that is sorted by descending weight.
+// Returns: an array of words whose characters total to 48.
+//   - The words should be selected to maximize weight.
+function WordScheduling(weightedWords) {
+  try {
+    // Step 1: Validate that the input is a valid array
+    if (!Array.isArray(weightedWords)) {
+      throw new TypeError("Input must be an array.");
+    }
+
+    if (weightedWords.length === 0) {
+      throw new Error("Input array is empty.");
+    }
+    // Implement a greedy algorithm to select words that total to 48 characters.
+    // The first word in the array must be used.
+    // TO-DO: Handle error cases where there are no combinations that total to 48 characters.
+    //    - Will need to get a larger set of related words to try. Or tell the user to try a different keyword.
+
+    let selectedWords = [];
+    let totalChars = 0;
+    let keyword = weightedWords[0][0];
+    let totalWeight = weightedWords[0][1];
+
+    if (!keyword || typeof keyword !== "string") {
+      throw new Error("First word in the array must be a valid string.");
+    }
+
+    // Stop conditions are when we've reached 48 characters or there are no more words to consider.
+    while (weightedWords.length > 0 && totalChars < 48) {
+      /*
+      // Starting here means we need to reset the selectedWords array.
+      // It starts with the keyword only.
+      selectedWords = [keyword];
+      totalChars = keyword.length;
+      totalWeight = weightedWords[0][1];
+
+      
+        Pop off the highest weighted word.
+        We do this because on the first run that word is the keyword which we are guaranteed to use, 
+        OR:We tried all combinations that use the highest weighted word and it didn't work. So get rid of
+        that word and try again.
+    
+      weightedWords.reverse();
+      weightedWords.pop();
+      weightedWords.reverse();
+
+      */
+      // Iterate through the remaining words to find the best combination.
+      weightedWords = weightedWords.reverse();
+      while (weightedWords.length > 0) {
+        let word = weightedWords.pop();
+        if (
+          totalChars + word[0].length <= 48 &&
+          !selectedWords.includes(word[0])
+        ) {
+          console.log("Word: ", word[0]);
+          console.log("Selected Words: ", selectedWords);
+          selectedWords.push(word[0]);
+          totalChars += word[0].length;
+          totalWeight += word[1];
+        } else {
+          // When we get here it means the last word we tried to add made us "bust" the 48 character limit.
+          // Try and replace a word that was already added with this one.
+          for (let j = selectedWords.length - 1; j >= 1; j--) {
+            if (
+              selectedWords[j].length < word[0].length &&
+              totalChars + word[0].length - selectedWords[j].length == 48 &&
+              !selectedWords.includes(word[0])
+            ) {
+              console.log("Word: ", word[0]);
+
+              totalChars -= selectedWords[j].length;
+              totalChars += word[0].length;
+              selectedWords[j] = word[0];
+              totalWeight += word[1];
+              console.log("Selected Words: ", selectedWords);
+              return selectedWords;
+            }
+          }
+        }
+      }
+    }
+
+    // When this line is reached, totalChars will either be 48 or only the weight of the keyword.
+    if (totalChars !== 48) {
+      return "No combinations that total to 48 characters.";
+    } else {
+      console.log("Total Weight: ", totalWeight);
+      return selectedWords;
+    }
+  } catch (error) {
+    // Step 4: Handle any errors and return a message
+    console.error("An error occurred: ", error.message);
+    return error.message; // Optionally return error message
+  }
+}
+
+module.exports = WordScheduling;
+/*
+let testCase1 = sampleWords;
+console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
+
+// Test Case 2: No Valid Combinations
+// Input: An array of words with lengths that make it impossible to reach a total of 48 characters.
+// Example: [{ word: "BUTTERFLY", weight: 10 }, { word: "DRAGONFLY", weight: 9 }]
+let testCase2 = [
+  { word: "BUTTERFLY", weight: 10 },
+  { word: "DRAGONFLY", weight: 9 },
+];
+console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
+
+// =============================
+// Test Case 3: Empty Input
+// Input: [] (an empty array)
+// Expected Output: The string "No combinations that total to 48 characters."
+let testCase3 = [];
+console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
+
+// Test Case 4: Input with Single Word
+// Input: [{ word: "EARTH", weight: 5 }]
+// Expected Output: The string "No combinations that total to 48 characters."
+let testCase4 = [{ word: "EARTH", weight: 5 }];
+console.log("Test Case 4: ", WordScheduling(testCase4)); // Should output: "No combinations that total to 48 characters."
+
+// Test Case 5: Input with Words of the Same Length
+// Input: An array of words where all words have the same length.
+// Example: [{ word: "FOUR", weight: 1 }, { word: "FIVE", weight: 2 }, { word: "NINE", weight: 3 }]
+let testCase5 = [
+  { word: "FOUR", weight: 1 },
+  { word: "FIVE", weight: 2 },
+  { word: "NINE", weight: 3 },
+];
+console.log("Test Case 5: ", WordScheduling(testCase5)); // Should output: "No combinations that total to 48 characters."
+let testCase6 = [
+  { word: "GALAXY", weight: 10 }, // 6 characters
+  { word: "SPACESHIP", weight: 9 }, // 9 characters
+  { word: "MARTIAN", weight: 8 }, // 7 characters
+  { word: "ASTRONAUT", weight: 15 }, // 9 characters
+  { word: "SCIENCEFICTION", weight: 12 }, // 14 characters
+];
+console.log("Test Case 6: ", WordScheduling(testCase6));
+// Expected Output: An array of words totaling exactly 48 characters.
+
+let testCase7 = [
+  { word: "SPACE", weight: 5 }, // 5 characters
+  { word: "SATELLITE", weight: 10 }, // 9 characters
+  { word: "PLANET", weight: 8 }, // 6 characters
+  { word: "ASTROBIOLOGY", weight: 12 }, // 13 characters
+  { word: "ASTEROID", weight: 7 }, // 8 characters
+  { word: "COSMOS", weight: 6 }, // 6 characters
+  { word: "STARS", weight: 4 }, // 5 characters
+  { word: "INTERSTELLAR", weight: 15 }, // 12 characters
+];
+console.log("Test Case 7: ", WordScheduling(testCase7));
+// Expected Output: An array of words that total to 48 characters.
+
+let testCase8 = [
+  { word: "SUPERCALIFRAGILISTICEXPIALIDOCIOUS", weight: 100 }, // 48 characters
+];
+console.log("Test Case 8: ", WordScheduling(testCase8));
+// Expected Output: ["SUPERCALIFRAGILISTICEXPIALIDOCIOUS"]
+
+let testCase9 = [
+  { word: "BLACKHOLE", weight: 12 }, // 9 characters
+  { word: "QUASAR", weight: 9 }, // 6 characters
+  { word: "NEBULA", weight: 8 }, // 6 characters
+  { word: "STAR", weight: 5 }, // 4 characters
+  { word: "SUPERNOVA", weight: 10 }, // 9 characters
+  { word: "UNIVERSE", weight: 7 }, // 8 characters
+];
+console.log("Test Case 9: ", WordScheduling(testCase9));
+// Expected Output: "No combinations that total to 48 characters."
+
+let testCase10 = [
+  { word: "MOON", weight: 1 }, // 4 characters
+  { word: "MARS", weight: 2 }, // 4 characters
+  { word: "SPACE", weight: 3 }, // 5 characters
+  { word: "ASTRONOMY", weight: 4 }, // 9 characters
+  { word: "STARS", weight: 5 }, // 5 characters
+  { word: "NEBULA", weight: 6 }, // 6 characters
+  { word: "GALAXY", weight: 7 }, // 6 characters
+  { word: "PLANETS", weight: 8 }, // 7 characters
+];
+console.log("Test Case 10: ", WordScheduling(testCase10));
+// Expected Output: Array of words that sum to 48 characters, with weights considered.
+
+let testCase11 = [
+  { word: "INTERSTELLARVOYAGER", weight: 20 }, // 19 characters
+  { word: "EXTRATERRESTRIALCOMMUNICATION", weight: 18 }, // 26 characters
+  { word: "UNIVERSE", weight: 10 }, // 8 characters
+];
+console.log("Test Case 11: ", WordScheduling(testCase11));
+// Expected Output: "No combinations that total to 48 characters."
+
+let testCase12 = [
+  { word: "SUN", weight: 1 }, // 3 characters
+  { word: "MOON", weight: 2 }, // 4 characters
+  { word: "BLACKHOLE", weight: 3 }, // 9 characters
+  { word: "QUASAR", weight: 4 }, // 6 characters
+  { word: "INTERGALACTIC", weight: 5 }, // 13 characters
+  { word: "EXOPLANET", weight: 6 }, // 8 characters
+  { word: "GRAVITY", weight: 7 }, // 7 characters
+  { word: "STARS", weight: 8 }, // 5 characters
+];
+console.log("Test Case 12: ", WordScheduling(testCase12));
+// Expected Output: An array of words that sum to 48 characters.
+
+//code to test the function just remove //
+function main() {
+  let testCase1 = sampleWords;
+  console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
+
+  let testCase2 = [
+    { word: "Satisfied", weight: 10 },
+    { word: "funtimesy", weight: 9 },
+  ];
+  console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
+
+  let testCase3 = [];
+  console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
+
+  // Add more test cases as needed
+}
+*/
+// Call main to run the tests
+//main(main);
+/*
+(async () => {
+  let wordList = await RelatedWords("fish");
+  let scheduledWords = WordScheduling(wordList);
+  console.log("scheduled words:" + scheduledWords);
+  // Print the number of characters found in all of the words.
+  let totalChars = 0;
+  scheduledWords.forEach((word) => {
+    totalChars += word.length;
+  });
+  console.log("Total Characters: ", totalChars);
+})();
+*/
+
+},{"./GridCanvas.js":1,"./RelatedWords.js":2}],4:[function(require,module,exports){
+
+},{}],5:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -510,7 +1034,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object.assign/polyfill":52,"util/":5}],3:[function(require,module,exports){
+},{"object.assign/polyfill":56,"util/":8}],6:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -535,14 +1059,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,global){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1132,7 +1656,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":4,"_process":54,"inherits":3}],6:[function(require,module,exports){
+},{"./support/isBuffer":7,"_process":58,"inherits":6}],9:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -1153,7 +1677,7 @@ module.exports = function availableTypedArrays() {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"possible-typed-array-names":53}],7:[function(require,module,exports){
+},{"possible-typed-array-names":57}],10:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -1165,7 +1689,7 @@ var $reflectApply = require('./reflectApply');
 /** @type {import('./actualApply')} */
 module.exports = $reflectApply || bind.call($call, $apply);
 
-},{"./functionApply":9,"./functionCall":10,"./reflectApply":12,"function-bind":29}],8:[function(require,module,exports){
+},{"./functionApply":12,"./functionCall":13,"./reflectApply":15,"function-bind":33}],11:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -1177,19 +1701,19 @@ module.exports = function applyBind() {
 	return actualApply(bind, $apply, arguments);
 };
 
-},{"./actualApply":7,"./functionApply":9,"function-bind":29}],9:[function(require,module,exports){
+},{"./actualApply":10,"./functionApply":12,"function-bind":33}],12:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./functionApply')} */
 module.exports = Function.prototype.apply;
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./functionCall')} */
 module.exports = Function.prototype.call;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var bind = require('function-bind');
@@ -1206,13 +1730,13 @@ module.exports = function callBindBasic(args) {
 	return $actualApply(bind, $call, args);
 };
 
-},{"./actualApply":7,"./functionCall":10,"es-errors/type":24,"function-bind":29}],12:[function(require,module,exports){
+},{"./actualApply":10,"./functionCall":13,"es-errors/type":28,"function-bind":33}],15:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./reflectApply')} */
 module.exports = typeof Reflect !== 'undefined' && Reflect && Reflect.apply;
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -1229,7 +1753,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 	return intrinsic;
 };
 
-},{"./":14,"get-intrinsic":30}],14:[function(require,module,exports){
+},{"./":17,"get-intrinsic":34}],17:[function(require,module,exports){
 'use strict';
 
 var setFunctionLength = require('set-function-length');
@@ -1255,7 +1779,27 @@ if ($defineProperty) {
 	module.exports.apply = applyBind;
 }
 
-},{"call-bind-apply-helpers":11,"call-bind-apply-helpers/applyBind":8,"es-define-property":18,"set-function-length":55}],15:[function(require,module,exports){
+},{"call-bind-apply-helpers":14,"call-bind-apply-helpers/applyBind":11,"es-define-property":22,"set-function-length":59}],18:[function(require,module,exports){
+'use strict';
+
+var GetIntrinsic = require('get-intrinsic');
+
+var callBind = require('call-bind');
+
+// eslint-disable-next-line no-extra-parens
+var $indexOf = callBind(/** @type {typeof String.prototype.indexOf} */ (GetIntrinsic('String.prototype.indexOf')));
+
+/** @type {import('.')} */
+module.exports = function callBoundIntrinsic(name, allowMissing) {
+	// eslint-disable-next-line no-extra-parens
+	var intrinsic = /** @type {Parameters<typeof callBind>[0]} */ (GetIntrinsic(name, !!allowMissing));
+	if (typeof intrinsic === 'function' && $indexOf(name, '.prototype.') > -1) {
+		return callBind(intrinsic);
+	}
+	return intrinsic;
+};
+
+},{"call-bind":17,"get-intrinsic":34}],19:[function(require,module,exports){
 (function (global){(function (){
 /*global window, global*/
 var util = require("util")
@@ -1346,7 +1890,7 @@ function consoleAssert(expression) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"assert":2,"util":58}],16:[function(require,module,exports){
+},{"assert":5,"util":62}],20:[function(require,module,exports){
 'use strict';
 
 var $defineProperty = require('es-define-property');
@@ -1404,7 +1948,7 @@ module.exports = function defineDataProperty(
 	}
 };
 
-},{"es-define-property":18,"es-errors/syntax":23,"es-errors/type":24,"gopd":32}],17:[function(require,module,exports){
+},{"es-define-property":22,"es-errors/syntax":27,"es-errors/type":28,"gopd":36}],21:[function(require,module,exports){
 'use strict';
 
 var callBind = require('call-bind-apply-helpers');
@@ -1429,7 +1973,7 @@ module.exports = desc && typeof desc.get === 'function'
 		}
 		: false;
 
-},{"call-bind-apply-helpers":11,"gopd":32}],18:[function(require,module,exports){
+},{"call-bind-apply-helpers":14,"gopd":36}],22:[function(require,module,exports){
 'use strict';
 
 /** @type {import('.')} */
@@ -1445,55 +1989,55 @@ if ($defineProperty) {
 
 module.exports = $defineProperty;
 
-},{}],19:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./eval')} */
 module.exports = EvalError;
 
-},{}],20:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 /** @type {import('.')} */
 module.exports = Error;
 
-},{}],21:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./range')} */
 module.exports = RangeError;
 
-},{}],22:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./ref')} */
 module.exports = ReferenceError;
 
-},{}],23:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./syntax')} */
 module.exports = SyntaxError;
 
-},{}],24:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./type')} */
 module.exports = TypeError;
 
-},{}],25:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./uri')} */
 module.exports = URIError;
 
-},{}],26:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 /** @type {import('.')} */
 module.exports = Object;
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var isCallable = require('is-callable');
@@ -1557,7 +2101,7 @@ var forEach = function forEach(list, iterator, thisArg) {
 
 module.exports = forEach;
 
-},{"is-callable":40}],28:[function(require,module,exports){
+},{"is-callable":44}],32:[function(require,module,exports){
 'use strict';
 
 /* eslint no-invalid-this: 1 */
@@ -1643,14 +2187,14 @@ module.exports = function bind(that) {
     return bound;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
 
 module.exports = Function.prototype.bind || implementation;
 
-},{"./implementation":28}],30:[function(require,module,exports){
+},{"./implementation":32}],34:[function(require,module,exports){
 'use strict';
 
 var undefined;
@@ -2024,13 +2568,13 @@ module.exports = function GetIntrinsic(name, allowMissing) {
 	return value;
 };
 
-},{"call-bind-apply-helpers/functionApply":9,"call-bind-apply-helpers/functionCall":10,"dunder-proto/get":17,"es-define-property":18,"es-errors":20,"es-errors/eval":19,"es-errors/range":21,"es-errors/ref":22,"es-errors/syntax":23,"es-errors/type":24,"es-errors/uri":25,"es-object-atoms":26,"function-bind":29,"gopd":32,"has-symbols":34,"hasown":37,"math-intrinsics/abs":43,"math-intrinsics/floor":44,"math-intrinsics/max":45,"math-intrinsics/min":46,"math-intrinsics/pow":47}],31:[function(require,module,exports){
+},{"call-bind-apply-helpers/functionApply":12,"call-bind-apply-helpers/functionCall":13,"dunder-proto/get":21,"es-define-property":22,"es-errors":24,"es-errors/eval":23,"es-errors/range":25,"es-errors/ref":26,"es-errors/syntax":27,"es-errors/type":28,"es-errors/uri":29,"es-object-atoms":30,"function-bind":33,"gopd":36,"has-symbols":38,"hasown":41,"math-intrinsics/abs":47,"math-intrinsics/floor":48,"math-intrinsics/max":49,"math-intrinsics/min":50,"math-intrinsics/pow":51}],35:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./gOPD')} */
 module.exports = Object.getOwnPropertyDescriptor;
 
-},{}],32:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 /** @type {import('.')} */
@@ -2047,7 +2591,7 @@ if ($gOPD) {
 
 module.exports = $gOPD;
 
-},{"./gOPD":31}],33:[function(require,module,exports){
+},{"./gOPD":35}],37:[function(require,module,exports){
 'use strict';
 
 var $defineProperty = require('es-define-property');
@@ -2071,7 +2615,7 @@ hasPropertyDescriptors.hasArrayLengthDefineBug = function hasArrayLengthDefineBu
 
 module.exports = hasPropertyDescriptors;
 
-},{"es-define-property":18}],34:[function(require,module,exports){
+},{"es-define-property":22}],38:[function(require,module,exports){
 'use strict';
 
 var origSymbol = typeof Symbol !== 'undefined' && Symbol;
@@ -2087,7 +2631,7 @@ module.exports = function hasNativeSymbols() {
 	return hasSymbolSham();
 };
 
-},{"./shams":35}],35:[function(require,module,exports){
+},{"./shams":39}],39:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./shams')} */
@@ -2134,7 +2678,7 @@ module.exports = function hasSymbols() {
 	return true;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var hasSymbols = require('has-symbols/shams');
@@ -2144,7 +2688,7 @@ module.exports = function hasToStringTagShams() {
 	return hasSymbols() && !!Symbol.toStringTag;
 };
 
-},{"has-symbols/shams":35}],37:[function(require,module,exports){
+},{"has-symbols/shams":39}],41:[function(require,module,exports){
 'use strict';
 
 var call = Function.prototype.call;
@@ -2154,7 +2698,7 @@ var bind = require('function-bind');
 /** @type {import('.')} */
 module.exports = bind.call(call, $hasOwn);
 
-},{"function-bind":29}],38:[function(require,module,exports){
+},{"function-bind":33}],42:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -2183,42 +2727,53 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],39:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 var hasToStringTag = require('has-tostringtag/shams')();
-var callBound = require('call-bind/callBound');
+var callBound = require('call-bound');
 
 var $toString = callBound('Object.prototype.toString');
 
+/** @type {import('.')} */
 var isStandardArguments = function isArguments(value) {
-	if (hasToStringTag && value && typeof value === 'object' && Symbol.toStringTag in value) {
+	if (
+		hasToStringTag
+		&& value
+		&& typeof value === 'object'
+		&& Symbol.toStringTag in value
+	) {
 		return false;
 	}
 	return $toString(value) === '[object Arguments]';
 };
 
+/** @type {import('.')} */
 var isLegacyArguments = function isArguments(value) {
 	if (isStandardArguments(value)) {
 		return true;
 	}
-	return value !== null &&
-		typeof value === 'object' &&
-		typeof value.length === 'number' &&
-		value.length >= 0 &&
-		$toString(value) !== '[object Array]' &&
-		$toString(value.callee) === '[object Function]';
+	return value !== null
+		&& typeof value === 'object'
+		&& 'length' in value
+		&& typeof value.length === 'number'
+		&& value.length >= 0
+		&& $toString(value) !== '[object Array]'
+		&& 'callee' in value
+		&& $toString(value.callee) === '[object Function]';
 };
 
 var supportsStandardArguments = (function () {
 	return isStandardArguments(arguments);
 }());
 
+// @ts-expect-error TODO make this not error
 isStandardArguments.isLegacyArguments = isLegacyArguments; // for tests
 
+/** @type {import('.')} */
 module.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
 
-},{"call-bind/callBound":13,"has-tostringtag/shams":36}],40:[function(require,module,exports){
+},{"call-bound":18,"has-tostringtag/shams":40}],44:[function(require,module,exports){
 'use strict';
 
 var fnToStr = Function.prototype.toString;
@@ -2321,7 +2876,7 @@ module.exports = reflectApply
 		return tryFunctionObject(value);
 	};
 
-},{}],41:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2361,7 +2916,7 @@ module.exports = function isGeneratorFunction(fn) {
 	return getProto(fn) === GeneratorFunction;
 };
 
-},{"has-tostringtag/shams":36}],42:[function(require,module,exports){
+},{"has-tostringtag/shams":40}],46:[function(require,module,exports){
 'use strict';
 
 var whichTypedArray = require('which-typed-array');
@@ -2371,37 +2926,37 @@ module.exports = function isTypedArray(value) {
 	return !!whichTypedArray(value);
 };
 
-},{"which-typed-array":59}],43:[function(require,module,exports){
+},{"which-typed-array":63}],47:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./abs')} */
 module.exports = Math.abs;
 
-},{}],44:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./abs')} */
 module.exports = Math.floor;
 
-},{}],45:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./max')} */
 module.exports = Math.max;
 
-},{}],46:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./min')} */
 module.exports = Math.min;
 
-},{}],47:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 /** @type {import('./pow')} */
 module.exports = Math.pow;
 
-},{}],48:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 var keysShim;
@@ -2525,7 +3080,7 @@ if (!Object.keys) {
 }
 module.exports = keysShim;
 
-},{"./isArguments":50}],49:[function(require,module,exports){
+},{"./isArguments":54}],53:[function(require,module,exports){
 'use strict';
 
 var slice = Array.prototype.slice;
@@ -2559,7 +3114,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./implementation":48,"./isArguments":50}],50:[function(require,module,exports){
+},{"./implementation":52,"./isArguments":54}],54:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2578,7 +3133,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],51:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 // modified from https://github.com/es-shims/es6-shim
@@ -2626,7 +3181,7 @@ module.exports = function assign(target, source1) {
 	return to; // step 4
 };
 
-},{"call-bind/callBound":13,"has-symbols/shams":35,"object-keys":49}],52:[function(require,module,exports){
+},{"call-bind/callBound":16,"has-symbols/shams":39,"object-keys":53}],56:[function(require,module,exports){
 'use strict';
 
 var implementation = require('./implementation');
@@ -2683,7 +3238,7 @@ module.exports = function getPolyfill() {
 	return Object.assign;
 };
 
-},{"./implementation":51}],53:[function(require,module,exports){
+},{"./implementation":55}],57:[function(require,module,exports){
 'use strict';
 
 /** @type {import('.')} */
@@ -2701,7 +3256,7 @@ module.exports = [
 	'BigUint64Array'
 ];
 
-},{}],54:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2887,7 +3442,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],55:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 var GetIntrinsic = require('get-intrinsic');
@@ -2931,9 +3486,9 @@ module.exports = function setFunctionLength(fn, length) {
 	return fn;
 };
 
-},{"define-data-property":16,"es-errors/type":24,"get-intrinsic":30,"gopd":32,"has-property-descriptors":33}],56:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],57:[function(require,module,exports){
+},{"define-data-property":20,"es-errors/type":28,"get-intrinsic":34,"gopd":36,"has-property-descriptors":37}],60:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],61:[function(require,module,exports){
 // Currently in sync with Node.js lib/internal/util/types.js
 // https://github.com/nodejs/node/commit/112cc7c27551254aa2b17098fb774867f05ed0d9
 
@@ -3269,7 +3824,7 @@ exports.isAnyArrayBuffer = isAnyArrayBuffer;
   });
 });
 
-},{"is-arguments":39,"is-generator-function":41,"is-typed-array":42,"which-typed-array":59}],58:[function(require,module,exports){
+},{"is-arguments":43,"is-generator-function":45,"is-typed-array":46,"which-typed-array":63}],62:[function(require,module,exports){
 (function (process){(function (){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3988,7 +4543,7 @@ function callbackify(original) {
 exports.callbackify = callbackify;
 
 }).call(this)}).call(this,require('_process'))
-},{"./support/isBuffer":56,"./support/types":57,"_process":54,"inherits":38}],59:[function(require,module,exports){
+},{"./support/isBuffer":60,"./support/types":61,"_process":58,"inherits":42}],63:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -4108,526 +4663,4 @@ module.exports = function whichTypedArray(value) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"available-typed-arrays":6,"call-bind":14,"call-bind/callBound":13,"for-each":27,"gopd":32,"has-tostringtag/shams":36}],60:[function(require,module,exports){
-(function (process){(function (){
-const { error } = require("console");
-
-let gridCharacter = (x, y) => ({
-  xpos: x,
-  ypos: y,
-  letter: "",
-  word: "",
-  top: null,
-  left: null,
-  right: null,
-  bottom: null,
-});
-
-let gridWidth = 6;
-let gridHeight = 8;
-let gridRow = (rowNum) => ({
-  row: [],
-  makeRow() {
-    for (let i = 0; i < gridWidth; i++) {
-      this.row.push(gridCharacter(i, rowNum));
-    }
-  },
-});
-
-let grid = () => ({
-  g: [],
-  makeGrid() {
-    for (let i = 0; i < gridHeight; i++) {
-      let r = gridRow(i);
-      r.makeRow();
-      this.g.push(r);
-    }
-  },
-});
-
-// DEBUG ISSUE #1: Currently the loop is infinite because where it is placing some words it is boxing
-// itself in and not able to place the rest of the words.
-function GridCanvas(puzzleWords) {
-  let puzzle_grid = grid();
-  puzzle_grid.makeGrid();
-  let frontEndLetters = [];
-  let frontEndKey = [];
-  for (let index = 0; index < 48; index++) {
-    frontEndLetters.push("");
-    frontEndKey.push("");
-  }
-
-  // Sort the puzzleWords array by length descending.
-  puzzleWords.sort((a, b) => b.length - a.length);
-  let wordsCopy = puzzleWords.slice();
-  let errorCount = 0;
-
-  puzzleWords.forEach((word) => {
-    let wordChars = word.split("");
-    let wordLength = wordChars.length;
-    // Pick a random point on the grid to start the word.
-    let goodSpot = false;
-    let xStart = 0;
-    let yStart = 0;
-
-    // Copy the current state of the front-end letters array.
-    let newLetters = [];
-    let newKey = [];
-    for (let i = 0; i < 48; i++) {
-      newLetters.push(frontEndLetters[i]);
-      newKey.push(frontEndKey[i]);
-    }
-
-    while (goodSpot == false) {
-      xStart = Math.floor(Math.random() * gridWidth);
-      yStart = Math.floor(Math.random() * gridHeight);
-      if (
-        puzzle_grid.g[yStart].row[xStart].letter == "" &&
-        emptyNeighbors(yStart, xStart, puzzle_grid).length > 0
-      ) {
-        goodSpot = true;
-        puzzle_grid.g[yStart].row[xStart].letter = wordChars[0];
-        puzzle_grid.g[yStart].row[xStart].word = word;
-        let simpleI = 6 * yStart + xStart;
-        newLetters[simpleI] = wordChars[0];
-        newKey[simpleI] = word + " 0";
-      } else {
-        console.log("Unacceptable placement at: " + xStart + "," + yStart);
-        errorCount++;
-        if (errorCount > 100) {
-          console.log("Too many errors, breaking.");
-          errorCount = 0;
-          frontEndLetters = [];
-          frontEndKey = [];
-          puzzleWords = wordsCopy.slice();
-        }
-      }
-    }
-
-    // Iterate through the next letters, placing each in a legal position.
-    for (let i = 1; i < wordLength; i++) {
-      // Check the legal moves from the current position.
-      let legalMoves = emptyNeighbors(yStart, xStart, puzzle_grid);
-      // Randomly choose a legal move.
-      let goodMove = false;
-      // Remove potential moves as we test them. If we can't find a move, we'll have to backtrack.
-
-      while (goodMove == false && legalMoves.length > 0) {
-        let randomMovePick = Math.floor(Math.random() * legalMoves.length);
-        let move = legalMoves[randomMovePick];
-        // Remove the move we're testing from legalMoves.
-        legalMoves.splice(randomMovePick, 1);
-
-        let yTest = move[0];
-        let xTest = move[1];
-
-        // Need to ignore the condition of leaving empty neighbors for the last letter.
-        if (
-          i == wordLength - 1 ||
-          emptyNeighbors(yTest, xTest, puzzle_grid).length > 0
-        ) {
-          yStart = yTest;
-          xStart = xTest;
-          puzzle_grid.g[yStart].row[xStart].letter = wordChars[i];
-          puzzle_grid.g[yStart].row[xStart].word = word;
-          goodMove = true;
-          // Find the basic (front-end) index of this bubble position.
-          let simpleI = 6 * yStart + xStart;
-          newLetters[simpleI] = wordChars[i];
-          newKey[simpleI] = word + " " + i;
-          // If this is the last letter, append " end" to the key.
-          if (i == wordLength - 1) {
-            newKey[simpleI] += " end";
-          }
-        }
-      }
-      // If we get to here and skipped a letter, need to restart from the beginning of the word.
-      if (goodMove == false) {
-        // Another impossible placement has occurred. Keep an error count to avoid constantly looping.
-        errorCount++;
-        if (errorCount > 100) {
-          console.log("Too many errors, breaking.");
-          errorCount = 0;
-          frontEndLetters = [];
-          frontEndKey = [];
-          puzzleWords = wordsCopy.slice();
-        } else {
-          newLetters = frontEndLetters.slice();
-          newKey = frontEndKey.slice();
-          puzzleWords.push(word);
-        }
-        break;
-      }
-    }
-    // Update the front-end letters array with the new word.
-    for (let i = 0; i < 48; i++) {
-      frontEndLetters[i] = newLetters[i];
-      frontEndKey[i] = newKey[i];
-    }
-  });
-  return [frontEndLetters, frontEndKey];
-}
-// Determine how many bubbles each puzzle word will use.
-function allotSpace(puzzleWords) {
-  let wordSizes = [];
-  puzzleWords.forEach((word) => {
-    wordSizes.push(word.split("").length);
-  });
-
-  return wordSizes;
-}
-
-function emptyNeighbors(y, x, grid) {
-  let gridHeight = grid.g.length;
-  let gridWidth = grid.g[0].row.length;
-
-  let neighbors = [];
-  let validNeighbors = [];
-  neighbors.push([y, x - 1]);
-  neighbors.push([y, x + 1]);
-  neighbors.push([y - 1, x]);
-  neighbors.push([y + 1, x]);
-  neighbors.push([y - 1, x - 1]);
-  neighbors.push([y + 1, x - 1]);
-  neighbors.push([y - 1, x + 1]);
-  neighbors.push([y + 1, x + 1]);
-
-  neighbors.forEach((neighbors) => {
-    if (
-      neighbors[0] >= 0 &&
-      neighbors[0] < gridHeight &&
-      neighbors[1] >= 0 &&
-      neighbors[1] < gridWidth
-    ) {
-      if (grid.g[neighbors[0]].row[neighbors[1]].letter == "") {
-        validNeighbors.push(neighbors);
-      }
-    }
-  });
-  return validNeighbors;
-}
-
-function WritePuzzleToFile(puzzleWords) {
-  const fs = require("fs");
-  let puzzle = GridCanvas(puzzleWords);
-  let puzzleLetters = puzzle[0];
-  let puzzleKey = puzzle[1];
-  //console.log(puzzleLetters);
-
-  // print the last generated puzzleWords to a file named "lastPuzzle.txt"
-  // Get current working directory.
-  let cwd = process.cwd();
-  console.log(cwd);
-  fs.writeFileSync(cwd + "/resources/lastPuzzle.txt", puzzleLetters.toString());
-
-  fs.writeFileSync(cwd + "/resources/lastPuzzleKey.txt", puzzleKey.toString());
-}
-
-module.exports = GridCanvas;
-
-}).call(this)}).call(this,require('_process'))
-},{"_process":54,"console":15,"fs":1}],61:[function(require,module,exports){
-// Require jsdom
-// const jsdom = require("jsdom");
-
-async function RelatedWords(keyword) {
-  const pageLink =
-    "https://pacific-fjord-98167-21542ad415f7.herokuapp.com/https://relatedwords.io/" +
-    keyword;
-  let words = [];
-  try {
-    const response = await fetch(pageLink);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const body = await response.text();
-    //const pageDOM = new jsdom.JSDOM(body);
-    const parser = new DOMParser();
-    const pageDOM = parser.parseFromString(body, "text/html");
-    let wordDivs = pageDOM.querySelectorAll(".word-ctn");
-
-    wordDivs.forEach((div) => {
-      words.push([
-        div.querySelector("a").textContent,
-        wordDivs.length - words.length,
-      ]);
-    });
-    console.log(words.length);
-  } catch (error) {
-    console.error(error.message);
-  }
-  return words;
-}
-
-module.exports = RelatedWords;
-
-},{}],62:[function(require,module,exports){
-const RelatedWords = require("./RelatedWords.js");
-const GridCanvas = require("./GridCanvas.js");
-//const WordAssociation = require("./WordAssociation.js");
-
-let wordForm = document.getElementById("keyword");
-let submitButton = document.getElementById("submit");
-
-// Add an event listener to the form to run the WordScheduling function when the form is submitted.
-submitButton.addEventListener("click", (event) => {
-  event.preventDefault();
-  let keyword = wordForm.value;
-  RelatedWords(keyword).then((weightedWords) => {
-    let scheduledWords = WordScheduling(weightedWords);
-    console.log("Scheduled Words: ", scheduledWords);
-    let lettersAndKeys = GridCanvas(scheduledWords);
-    console.log("Scheduled Words: ", scheduledWords);
-    let letters = lettersAndKeys[0];
-    console.log("Letters: ", letters);
-    let keys = lettersAndKeys[1];
-    // Write the letters and keys to a hidden <p> element.
-    let lettersElement = document.getElementById("letters");
-    lettersElement.textContent = letters.join();
-    document.body.appendChild(lettersElement);
-    let keysElement = document.getElementById("keys");
-    keysElement.textContent = keys.join();
-    document.body.appendChild(keysElement);
-  });
-});
-
-// Parameters: weightedWords - an array of words generated from WordAssociation that is sorted by descending weight.
-// Returns: an array of words whose characters total to 48.
-//   - The words should be selected to maximize weight.
-function WordScheduling(weightedWords) {
-  try {
-    // Step 1: Validate that the input is a valid array
-    if (!Array.isArray(weightedWords)) {
-      throw new TypeError("Input must be an array.");
-    }
-
-    if (weightedWords.length === 0) {
-      throw new Error("Input array is empty.");
-    }
-    // Implement a greedy algorithm to select words that total to 48 characters.
-    // The first word in the array must be used.
-    // TO-DO: Handle error cases where there are no combinations that total to 48 characters.
-    //    - Will need to get a larger set of related words to try. Or tell the user to try a different keyword.
-
-    let selectedWords = [];
-    let totalChars = 0;
-    let keyword = weightedWords[0][0];
-    let totalWeight = weightedWords[0][1];
-
-    if (!keyword || typeof keyword !== "string") {
-      throw new Error("First word in the array must be a valid string.");
-    }
-
-    // Stop conditions are when we've reached 48 characters or there are no more words to consider.
-    while (weightedWords.length > 0 && totalChars < 48) {
-      /*
-      // Starting here means we need to reset the selectedWords array.
-      // It starts with the keyword only.
-      selectedWords = [keyword];
-      totalChars = keyword.length;
-      totalWeight = weightedWords[0][1];
-
-      
-        Pop off the highest weighted word.
-        We do this because on the first run that word is the keyword which we are guaranteed to use, 
-        OR:We tried all combinations that use the highest weighted word and it didn't work. So get rid of
-        that word and try again.
-    
-      weightedWords.reverse();
-      weightedWords.pop();
-      weightedWords.reverse();
-
-      */
-      // Iterate through the remaining words to find the best combination.
-      weightedWords = weightedWords.reverse();
-      while (weightedWords.length > 0) {
-        let word = weightedWords.pop();
-        if (
-          totalChars + word[0].length <= 48 &&
-          !selectedWords.includes(word[0])
-        ) {
-          console.log("Word: ", word[0]);
-          console.log("Selected Words: ", selectedWords);
-          selectedWords.push(word[0]);
-          totalChars += word[0].length;
-          totalWeight += word[1];
-        } else {
-          // When we get here it means the last word we tried to add made us "bust" the 48 character limit.
-          // Try and replace a word that was already added with this one.
-          for (let j = selectedWords.length - 1; j >= 1; j--) {
-            if (
-              selectedWords[j].length < word[0].length &&
-              totalChars + word[0].length - selectedWords[j].length == 48 &&
-              !selectedWords.includes(word[0])
-            ) {
-              console.log("Word: ", word[0]);
-
-              totalChars -= selectedWords[j].length;
-              totalChars += word[0].length;
-              selectedWords[j] = word[0];
-              totalWeight += word[1];
-              console.log("Selected Words: ", selectedWords);
-              return selectedWords;
-            }
-          }
-        }
-      }
-    }
-
-    // When this line is reached, totalChars will either be 48 or only the weight of the keyword.
-    if (totalChars !== 48) {
-      return "No combinations that total to 48 characters.";
-    } else {
-      console.log("Total Weight: ", totalWeight);
-      return selectedWords;
-    }
-  } catch (error) {
-    // Step 4: Handle any errors and return a message
-    console.error("An error occurred: ", error.message);
-    return error.message; // Optionally return error message
-  }
-}
-/*
-let testCase1 = sampleWords;
-console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
-
-// Test Case 2: No Valid Combinations
-// Input: An array of words with lengths that make it impossible to reach a total of 48 characters.
-// Example: [{ word: "BUTTERFLY", weight: 10 }, { word: "DRAGONFLY", weight: 9 }]
-let testCase2 = [
-  { word: "BUTTERFLY", weight: 10 },
-  { word: "DRAGONFLY", weight: 9 },
-];
-console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
-
-// =============================
-// Test Case 3: Empty Input
-// Input: [] (an empty array)
-// Expected Output: The string "No combinations that total to 48 characters."
-let testCase3 = [];
-console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
-
-// Test Case 4: Input with Single Word
-// Input: [{ word: "EARTH", weight: 5 }]
-// Expected Output: The string "No combinations that total to 48 characters."
-let testCase4 = [{ word: "EARTH", weight: 5 }];
-console.log("Test Case 4: ", WordScheduling(testCase4)); // Should output: "No combinations that total to 48 characters."
-
-// Test Case 5: Input with Words of the Same Length
-// Input: An array of words where all words have the same length.
-// Example: [{ word: "FOUR", weight: 1 }, { word: "FIVE", weight: 2 }, { word: "NINE", weight: 3 }]
-let testCase5 = [
-  { word: "FOUR", weight: 1 },
-  { word: "FIVE", weight: 2 },
-  { word: "NINE", weight: 3 },
-];
-console.log("Test Case 5: ", WordScheduling(testCase5)); // Should output: "No combinations that total to 48 characters."
-let testCase6 = [
-  { word: "GALAXY", weight: 10 }, // 6 characters
-  { word: "SPACESHIP", weight: 9 }, // 9 characters
-  { word: "MARTIAN", weight: 8 }, // 7 characters
-  { word: "ASTRONAUT", weight: 15 }, // 9 characters
-  { word: "SCIENCEFICTION", weight: 12 }, // 14 characters
-];
-console.log("Test Case 6: ", WordScheduling(testCase6));
-// Expected Output: An array of words totaling exactly 48 characters.
-
-let testCase7 = [
-  { word: "SPACE", weight: 5 }, // 5 characters
-  { word: "SATELLITE", weight: 10 }, // 9 characters
-  { word: "PLANET", weight: 8 }, // 6 characters
-  { word: "ASTROBIOLOGY", weight: 12 }, // 13 characters
-  { word: "ASTEROID", weight: 7 }, // 8 characters
-  { word: "COSMOS", weight: 6 }, // 6 characters
-  { word: "STARS", weight: 4 }, // 5 characters
-  { word: "INTERSTELLAR", weight: 15 }, // 12 characters
-];
-console.log("Test Case 7: ", WordScheduling(testCase7));
-// Expected Output: An array of words that total to 48 characters.
-
-let testCase8 = [
-  { word: "SUPERCALIFRAGILISTICEXPIALIDOCIOUS", weight: 100 }, // 48 characters
-];
-console.log("Test Case 8: ", WordScheduling(testCase8));
-// Expected Output: ["SUPERCALIFRAGILISTICEXPIALIDOCIOUS"]
-
-let testCase9 = [
-  { word: "BLACKHOLE", weight: 12 }, // 9 characters
-  { word: "QUASAR", weight: 9 }, // 6 characters
-  { word: "NEBULA", weight: 8 }, // 6 characters
-  { word: "STAR", weight: 5 }, // 4 characters
-  { word: "SUPERNOVA", weight: 10 }, // 9 characters
-  { word: "UNIVERSE", weight: 7 }, // 8 characters
-];
-console.log("Test Case 9: ", WordScheduling(testCase9));
-// Expected Output: "No combinations that total to 48 characters."
-
-let testCase10 = [
-  { word: "MOON", weight: 1 }, // 4 characters
-  { word: "MARS", weight: 2 }, // 4 characters
-  { word: "SPACE", weight: 3 }, // 5 characters
-  { word: "ASTRONOMY", weight: 4 }, // 9 characters
-  { word: "STARS", weight: 5 }, // 5 characters
-  { word: "NEBULA", weight: 6 }, // 6 characters
-  { word: "GALAXY", weight: 7 }, // 6 characters
-  { word: "PLANETS", weight: 8 }, // 7 characters
-];
-console.log("Test Case 10: ", WordScheduling(testCase10));
-// Expected Output: Array of words that sum to 48 characters, with weights considered.
-
-let testCase11 = [
-  { word: "INTERSTELLARVOYAGER", weight: 20 }, // 19 characters
-  { word: "EXTRATERRESTRIALCOMMUNICATION", weight: 18 }, // 26 characters
-  { word: "UNIVERSE", weight: 10 }, // 8 characters
-];
-console.log("Test Case 11: ", WordScheduling(testCase11));
-// Expected Output: "No combinations that total to 48 characters."
-
-let testCase12 = [
-  { word: "SUN", weight: 1 }, // 3 characters
-  { word: "MOON", weight: 2 }, // 4 characters
-  { word: "BLACKHOLE", weight: 3 }, // 9 characters
-  { word: "QUASAR", weight: 4 }, // 6 characters
-  { word: "INTERGALACTIC", weight: 5 }, // 13 characters
-  { word: "EXOPLANET", weight: 6 }, // 8 characters
-  { word: "GRAVITY", weight: 7 }, // 7 characters
-  { word: "STARS", weight: 8 }, // 5 characters
-];
-console.log("Test Case 12: ", WordScheduling(testCase12));
-// Expected Output: An array of words that sum to 48 characters.
-
-//code to test the function just remove //
-function main() {
-  let testCase1 = sampleWords;
-  console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
-
-  let testCase2 = [
-    { word: "Satisfied", weight: 10 },
-    { word: "funtimesy", weight: 9 },
-  ];
-  console.log("Test Case 2: ", WordScheduling(testCase2)); // Should output: "No combinations that total to 48 characters."
-
-  let testCase3 = [];
-  console.log("Test Case 3: ", WordScheduling(testCase3)); // Should output: "No combinations that total to 48 characters."
-
-  // Add more test cases as needed
-}
-*/
-// Call main to run the tests
-//main(main);
-/*
-(async () => {
-  let wordList = await RelatedWords("fish");
-  let scheduledWords = WordScheduling(wordList);
-  console.log("scheduled words:" + scheduledWords);
-  // Print the number of characters found in all of the words.
-  let totalChars = 0;
-  scheduledWords.forEach((word) => {
-    totalChars += word.length;
-  });
-  console.log("Total Characters: ", totalChars);
-})();
-*/
-
-},{"./GridCanvas.js":60,"./RelatedWords.js":61}]},{},[62]);
+},{"available-typed-arrays":9,"call-bind":17,"call-bind/callBound":16,"for-each":31,"gopd":36,"has-tostringtag/shams":40}]},{},[3]);

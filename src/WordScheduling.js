@@ -123,6 +123,8 @@ function WordScheduling(weightedWords) {
     return error.message; // Optionally return error message
   }
 }
+
+module.exports = WordScheduling;
 /*
 let testCase1 = sampleWords;
 console.log("Test Case 1: ", WordScheduling(testCase1)); // Should output an array of words with 48 characters.
